@@ -1,0 +1,247 @@
+# =================================================================
+#      DARKWEB FORUMS TRACKER - UNIFIED DOCKER COMPOSE
+# =================================================================
+# This file defines the entire application stack: N8N, Playwright MCP, and PostgreSQL.
+#
+# Usage:
+#   Start:     docker compose up -d
+#   Stop:      docker compose down
+#   Destroy:   docker compose down -v --remove-orphans
+#
+# =================================================================
+
+name: darkweb-forums-tracker
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-config:
+  n8n-data:
+  shared-screenshots:
+  playwright-browser-data:
+  redis-data:
+  n8n-workflows:
+
+services:
+  # -----------------------------------------------------------------
+  #                            Redis Service
+  # -----------------------------------------------------------------
+  redis:
+    container_name: darkweb-forums-tracker-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks: [app-network]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # -----------------------------------------------------------------
+  #                     N8N Workflow Init Container
+  # -----------------------------------------------------------------
+  n8n-import:
+    container_name: darkweb-forums-tracker-n8n-import
+    image: n8nio/n8n:latest
+    user: "1000:1000"
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "n8n import:workflow --separate --input=/backup/workflows || echo 'No workflows to import'"
+    environment:
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_DATABASE=postgres
+      - DB_POSTGRESDB_SCHEMA=n8n_data
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - ./n8n/workflows:/backup/workflows:ro
+    networks: [app-network]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  # -----------------------------------------------------------------
+  #                            N8N Main Service
+  # -----------------------------------------------------------------
+  n8n:
+    container_name: darkweb-forums-tracker-n8n
+    image: n8nio/n8n:latest
+    user: "1000:1000"
+    restart: unless-stopped
+    ports: ["${N8N_PORT:-5678}:5678"]
+    environment:
+      # Basic Configuration
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Berlin}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - WEBHOOK_URL=http://localhost:${N8N_PORT:-5678}/
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - N8N_RUNNERS_ENABLED=true
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      - NODE_ENV=production
+      - N8N_DISABLE_UI=${N8N_DISABLE_UI:-false}
+
+      # User Management & Authentication
+      - N8N_USER_MANAGEMENT_DISABLED=false
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_USER_FOLDER=/home/node/.n8n
+
+      # Database Configuration  
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_DATABASE=postgres
+      - DB_POSTGRESDB_SCHEMA=n8n_data
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?schema=n8n_data
+
+      # Queue Configuration
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=2
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
+
+      # Performance & Security
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+      - EXECUTIONS_DATA_PRUNE_MAX_COUNT=10000
+      - N8N_TEMPLATES_ENABLED=true
+      - N8N_PUBLIC_API_DISABLED=false
+
+      # Supabase Cloud URL
+      - SUPABASE_URL=${SUPABASE_URL}
+
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - shared-screenshots:/screenshots
+      - n8n-workflows:/workflows
+    networks: [app-network]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      n8n-import: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # -----------------------------------------------------------------
+  #                            N8N Worker Service
+  # -----------------------------------------------------------------
+  n8n-worker:
+    container_name: darkweb-forums-tracker-n8n-worker
+    image: n8nio/n8n:latest
+    user: "1000:1000"
+    restart: unless-stopped
+    command: worker
+    environment:
+      # Basic Configuration
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Berlin}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+
+      # Database Configuration
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_DATABASE=postgres
+      - DB_POSTGRESDB_SCHEMA=n8n_data
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?schema=n8n_data
+
+      # Queue Configuration
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=2
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
+
+      # Supabase Cloud URL
+      - SUPABASE_URL=${SUPABASE_URL}
+
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - shared-screenshots:/screenshots
+    networks: [app-network]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      n8n: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5679/healthz"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+
+  # -----------------------------------------------------------------
+  #                       PLAYWRIGHT MCP Service
+  # -----------------------------------------------------------------
+  playwright-mcp:
+    container_name: darkweb-forums-tracker-playwright
+    build: { context: ./playwright-mcp }
+    restart: unless-stopped
+    ports: 
+      - "${PLAYWRIGHT_MCP_PORT:-8831}:8831"
+      - "5900:5900"  # VNC port for browser GUI access
+      - "6080:6080"  # noVNC web interface
+    environment:
+      # Core configuration (user-defined in .env)
+      - PLAYWRIGHT_MCP_PORT=${PLAYWRIGHT_MCP_PORT:-8831}
+      - PLAYWRIGHT_VIEWPORT_SIZE=${PLAYWRIGHT_VIEWPORT_SIZE:-1280,720}
+      # Debug mode (always enabled)
+      - DEBUG=pw:browser,pw:network,pw:page
+    volumes:
+      - shared-screenshots:/screenshots
+      - playwright-browser-data:/app/browser-data
+    networks: [app-network]
+    depends_on: []
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8831/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    # Essential for browser in container
+    shm_size: '1g'
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+
+
+  # -----------------------------------------------------------------
+  #                         LOCAL POSTGRES DB
+  # -----------------------------------------------------------------
+  # Simple PostgreSQL for n8n data storage only
+  db:
+    container_name: darkweb-forums-tracker-db
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ./n8n/init-n8n-db.sql:/docker-entrypoint-initdb.d/init-n8n-db.sql:ro
+    networks: [app-network]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

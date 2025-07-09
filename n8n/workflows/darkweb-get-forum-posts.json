@@ -1,0 +1,1104 @@
+{
+  "name": "darkweb-forums-1.8",
+  "nodes": [
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"task_status\": {\n      \"type\": \"string\",\n      \"enum\": [\"success\", \"failed\"],\n      \"description\": \"Status of the forum parsing task\"\n    },\n    \"failed_cause\": {\n      \"type\": \"string\",\n      \"enum\": [\"login_needed\", \"bot_captcha\", \"page_unreachable\"],\n      \"description\": \"Reason for task failure (only present when task_status is 'failed')\"\n    },\n    \"error_details\": {\n      \"type\": \"string\",\n      \"description\": \"Additional details about the error (optional for failed tasks)\"\n    },\n    \"forum_posts\": {\n      \"type\": \"array\",\n      \"description\": \"Array of forum threads extracted from the forum page (only present when task_status is 'success')\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"post_title\": {\n            \"type\": \"string\",\n            \"description\": \"The title/subject of the forum thread as displayed on the forum, with pagination indicators removed\"\n          },\n          \"post_link\": {\n            \"type\": \"string\",\n            \"description\": \"Complete URL to the thread, constructed as base forum URL + thread path\"\n          },\n          \"post_author_name\": {\n            \"type\": \"string\",\n            \"description\": \"Username of the thread creator/original poster\"\n          },\n          \"post_author_link\": {\n            \"type\": \"string\",\n            \"description\": \"Profile URL of the thread author, constructed as base forum URL + '/User-' + username\"\n          },\n          \"last_post_date\": {\n            \"type\": \"string\",\n            \"description\": \"Last activity timestamp as text from forum (e.g., '2 minutes ago', '1 hour ago')\"\n          },\n          \"last_post_author\": {\n            \"type\": \"string\",\n            \"description\": \"Username of the last person to post/reply in the thread\"\n          },\n          \"last_post_author_link\": {\n            \"type\": \"string\",\n            \"description\": \"Profile URL of the last activity author, constructed as base forum URL + '/User-' + username\"\n          }\n        },\n        \"required\": [\n          \"post_title\",\n          \"post_link\", \n          \"post_author_name\",\n          \"post_author_link\",\n          \"last_post_date\",\n          \"last_post_author\",\n          \"last_post_author_link\"\n        ],\n        \"additionalProperties\": false\n      }\n    }\n  },\n  \"required\": [\"task_status\"],\n  \"if\": {\n    \"properties\": {\n      \"task_status\": {\n        \"const\": \"success\"\n      }\n    }\n  },\n  \"then\": {\n    \"required\": [\"forum_posts\"],\n    \"properties\": {\n      \"forum_posts\": {\n        \"minItems\": 0\n      }\n    },\n    \"not\": {\n      \"required\": [\"failed_cause\"]\n    }\n  },\n  \"else\": {\n    \"if\": {\n      \"properties\": {\n        \"task_status\": {\n          \"const\": \"failed\"\n        }\n      }\n    },\n    \"then\": {\n      \"required\": [\"failed_cause\"],\n      \"not\": {\n        \"required\": [\"forum_posts\"]\n      }\n    }\n  },\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        1792
+      ],
+      "id": "ee3ba327-6a1f-4cc3-9fc4-4920309a6e5d",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://host.docker.internal:8831/sse",
+        "include": "except",
+        "excludeTools": [
+          "browser_file_upload",
+          "browser_install",
+          "browser_pdf_save",
+          "browser_drag",
+          "browser_generate_playwright_test"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        224,
+        1792
+      ],
+      "id": "e5b8f6a6-282d-4a24-a691-932e60cd32c3",
+      "name": "Playwright MCP"
+    },
+    {
+      "parameters": {
+        "description": "You are scanning a specific forum page and your goal is to extract the visible list of post threads while maintaining natural, human-like behavior.\n\nYour job is to:\n- Plan natural interaction patterns\n- Be patient and let pages load naturally\n- Handle blockers (CAPTCHA/DDoS) with human-like timing:\n  * Hover before clicking\n  * Wait natural intervals\n  * Type responses with variable speed\n- Extract data with smooth scrolling and natural pauses\n- Stay within the current URL\n- Structure the extracted forum post threads correctly\n\nRemember:\n1. Every action should mimic human behavior\n2. Add random delays between operations\n3. Use mouse movement before clicks\n4. Scroll content naturally\n5. Type with variable speed when needed\n6. Handle challenges patiently and naturally\n\nAlways focus on: navigate naturally, handle challenges like a human, extract data stealthily."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1792
+      ],
+      "id": "21f6daba-ad89-4647-b7e6-1d9d93561c5c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6aca17c5-a68f-4565-8bf8-45e9d3c14b63",
+              "name": "keywords",
+              "value": "=[\"twitter\",\"telegram\",\"brazil\",\"brasil\",\".com.br\",\"ssn\",\"crypto\",\"lockbit\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1424,
+        1024
+      ],
+      "id": "7728802c-0f24-4970-9d9c-8239f885d4ae",
+      "name": "Keywords"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/check_existing_forum_posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"post_links_to_check\": {{ $json.output.forum_posts.map(post => post.post_link).toJsonString() }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        528,
+        1264
+      ],
+      "id": "3522148e-4614-45f6-9154-8d44bc582266",
+      "name": "Supabase RPC Check Existing URLs",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uf6FeLUksFchCWHS",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "post_link",
+              "field2": "existing_post_link"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        1024
+      ],
+      "id": "a9218783-f446-49fe-a71c-836f62781766",
+      "name": "Merge Only New URLs",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "forum_url_path",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        160,
+        1024
+      ],
+      "id": "20544b75-bb03-4cf3-be13-2fa9efd1dc56",
+      "name": "Split Out URLs to Track"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "username": "DarkWeb Forums",
+          "wait": false
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=### {{ $json.forum_name }}\n- {{ $json.forum_url_path }}",
+              "author": "=🔄 Forum tracking started",
+              "color": "#3498DB",
+              "timestamp": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        1264
+      ],
+      "id": "0e246dfa-c1b1-49f3-a665-a5fdd62834e4",
+      "name": "Inform Tracking Started",
+      "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "E8qcUyY1l5Sggdrj",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "username": "DarkWeb Forums",
+          "wait": true
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=### {{ $('Loop Over URLs').item.json.forum_name }}\n- {{ $('Loop Over URLs').item.json.forum_url_path }}\n> AI agent tried to obtain data, but an error occurred. {{ $json.output.error_details }}\n`Check workflow logs • Manual review required`",
+              "author": "=⚠️ Forum tracking failed",
+              "color": "#E74C3C",
+              "timestamp": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        528,
+        1760
+      ],
+      "id": "265495d3-f050-4208-a6da-0738f688f206",
+      "name": "Inform Tracking Failed",
+      "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
+      "executeOnce": true,
+      "retryOnFail": false,
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "E8qcUyY1l5Sggdrj",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6e494dc-8c00-4583-a950-510c65468f38",
+              "leftValue": "={{ $json.forum_posts[0] }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        1264
+      ],
+      "id": "d223db5a-ab40-4cff-80f4-c083edd221b6",
+      "name": "Has New Posts?"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "username": "DarkWeb Forums",
+          "wait": true
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=### {{ $('Loop Over URLs').item.json.forum_name }}\n- {{ $('Loop Over URLs').item.json.forum_url_path }}",
+              "author": "=⛔ No new posts found",
+              "color": "#3498DB",
+              "timestamp": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        848,
+        1520
+      ],
+      "id": "d424cea1-a9f8-4cf2-a31d-68951b31f737",
+      "name": "Inform No New Posts Found",
+      "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
+      "executeOnce": true,
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "E8qcUyY1l5Sggdrj",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        1024
+      ],
+      "id": "30bfa28d-9bc0-4d44-a3b3-662d649dacd0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        1792
+      ],
+      "id": "646c0d3b-967f-4d21-8611-d460987d6e9a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0skcS8gMjB4IiGFN",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.task_status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "305279dd-7b2b-471c-aba0-0c5fc195c520"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cd9e2a01-3870-4596-a50e-9288ac4fd972",
+                    "leftValue": "={{ $json.output.task_status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 1
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        1264
+      ],
+      "id": "70be9826-cfcb-4222-9327-bc5d57dec4ff",
+      "name": "Switch Agent Output",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -416,
+        1264
+      ],
+      "id": "584ad814-a66a-42de-83eb-5994c90b00f6",
+      "name": "Loop Over URLs",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.forum_posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        528,
+        1024
+      ],
+      "id": "a89643ca-16f4-42e8-afb9-c726d309d081",
+      "name": "Split Out Forum Posts"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "forum_posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        1024
+      ],
+      "id": "a86babe7-f067-4fd9-81be-1608db6eb0ac",
+      "name": "Recompose New Posts Array"
+    },
+    {
+      "parameters": {
+        "tableId": "darkweb_forums",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "monitored_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "post_title",
+              "fieldValue": "={{ $json.post.post_title }}"
+            },
+            {
+              "fieldId": "post_link",
+              "fieldValue": "={{ $json.post.post_link }}"
+            },
+            {
+              "fieldId": "post_author_name",
+              "fieldValue": "={{ $json.post.post_author_name }}"
+            },
+            {
+              "fieldId": "post_author_link",
+              "fieldValue": "={{ $json.post.post_author_link }}"
+            },
+            {
+              "fieldId": "last_post_date",
+              "fieldValue": "={{ $json.post.last_post_date }}"
+            },
+            {
+              "fieldId": "last_post_author",
+              "fieldValue": "={{ $json.post.last_post_author }}"
+            },
+            {
+              "fieldId": "last_post_author_link",
+              "fieldValue": "={{ $json.post.last_post_author_link }}"
+            },
+            {
+              "fieldId": "forum_name",
+              "fieldValue": "={{ $('Loop Over URLs').item.json.forum_name }}"
+            },
+            {
+              "fieldId": "forum_url",
+              "fieldValue": "={{ $('Loop Over URLs').item.json.forum_url_path }}"
+            },
+            {
+              "fieldId": "keyword_alert",
+              "fieldValue": "={{ $json.keywords.some(keyword => $json.post.post_title.toLowerCase().replaceSpecialChars().trim().includes(keyword)) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        1264
+      ],
+      "id": "4f69f84e-9713-4e73-ad0f-1356e7a4127f",
+      "name": "Add Posts to Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "uf6FeLUksFchCWHS",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a60ead9-cd31-4e48-b81c-71b347d84428",
+              "name": "forum_name",
+              "value": "DarkForums.st",
+              "type": "string"
+            },
+            {
+              "id": "dcdea795-8f21-4213-aa5f-0866bdc6f9e8",
+              "name": "forum_icon",
+              "value": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCWBDE-GmAiY_vPK4mNsuaPC8-gpK7u7ZFf46RcYP2SBNH4i_UcHc35Uoggs4e3DjvPmw&usqp=CAU",
+              "type": "string"
+            },
+            {
+              "id": "b8c7e0f0-1936-4e51-82be-b0c577f42734",
+              "name": "forum_url",
+              "value": "https://darkforums.st",
+              "type": "string"
+            },
+            {
+              "id": "e084011b-ec05-4f17-bd25-d448a4ea3eb6",
+              "name": "forum_url_path[0]",
+              "value": "https://darkforums.st/Forum-Databases",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        1024
+      ],
+      "id": "429b022b-faf1-4123-b6d4-9934688b60af",
+      "name": "DarkForums.st Metadata"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        1760
+      ],
+      "id": "27b86ef9-c2e2-46a9-81c4-4df76dea2207",
+      "name": "Wait",
+      "webhookId": "34f815ed-1095-4ad1-8a61-18b42ca04db0"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "forum_posts",
+        "options": {
+          "destinationFieldName": "post"
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        1264
+      ],
+      "id": "c2555b9b-c1f5-47a5-a086-f22caa2b8bfe",
+      "name": "Split Out Forum Posts Again"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MjpLUuPr5mek7iVx",
+          "mode": "list",
+          "cachedResultName": "darkweb-forums-discord-1.1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "forum_icon": "={{ $('Loop Over URLs').item.json.forum_icon }}",
+            "forum_name": "={{ $json.forum_name }}",
+            "forum_url_path": "={{ $json.forum_url }}",
+            "keyword_alert": "={{ $json.keyword_alert }}",
+            "post_id": "={{ $json.id }}",
+            "post_link": "={{ $json.post_link }}",
+            "post_title": "={{ $json.post_title }}",
+            "post_author_name": "={{ $json.post_author_name }}",
+            "post_author_link": "={{ $json.post_author_link }}",
+            "last_post_date": "={{ $json.last_post_date }}",
+            "last_post_author": "={{ $json.last_post_author }}",
+            "last_post_author_link": "={{ $json.last_post_author_link }}",
+            "screenshot_filename": "={{ $json.id }}-{{ $json.post_link.split('/').slice(3).join('/').replace(/[^a-zA-Z0-9-_]/g, '-') }}.jpeg"
+          },
+          "matchingColumns": [
+            "forum_icon",
+            "forum_name",
+            "forum_url_path",
+            "keyword_alert"
+          ],
+          "schema": [
+            {
+              "id": "forum_name",
+              "displayName": "forum_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "forum_url_path",
+              "displayName": "forum_url_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "forum_icon",
+              "displayName": "forum_icon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "post_title",
+              "displayName": "post_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "post_link",
+              "displayName": "post_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "post_author_name",
+              "displayName": "post_author_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "post_author_link",
+              "displayName": "post_author_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "last_post_date",
+              "displayName": "last_post_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "last_post_author",
+              "displayName": "last_post_author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "last_post_author_link",
+              "displayName": "last_post_author_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "screenshot_filename",
+              "displayName": "screenshot_filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "keyword_alert",
+              "displayName": "keyword_alert",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1424,
+        1520
+      ],
+      "name": "Send Posts to Discord Feed",
+      "id": "04fe398e-5721-4dd1-b833-11157c2a0016",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Loop Over URLs').item.json.forum_url_path }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI agent responsible for parsing ARIA snapshot YAML data from a {{ $('Loop Over URLs').item.json.forum_name }} forum page using Playwright MCP tools. Your task is to extract structured information about forum threads and compile them into a JSON response with proper status handling.\n\n## IMPORTANT: OUTPUT STATUS HANDLING\n\nYour response MUST follow these status rules:\n\n### SUCCESS SCENARIO (task_status: \"success\")\n- When you successfully access the forum page and can extract thread data\n- Output format: `{\"task_status\": \"success\", \"forum_posts\": [...]}`\n- Include the forum_posts array even if it's empty (no threads found)\n- NEVER include \"failed_cause\" in success responses\n\n### FAILURE SCENARIOS (task_status: \"failed\")\n- When you cannot complete the task for any reason\n- Output format: `{\"task_status\": \"failed\", \"failed_cause\": \"reason\", \"error_details\": \"optional details\"}`\n- NEVER include \"forum_posts\" in failed responses\n- NEVER generate dummy/fake data\n\n**Failed Cause Options:**\n- `\"login_needed\"`: When the page requires authentication/login\n- `\"bot_captcha\"`: When blocked by anti-bot systems, CAPTCHA, or Cloudflare protection\n- `\"page_unreachable\"`: When page is offline, returns errors, times out, or is inaccessible\n\n---\n\n## EXTRACT REQUIRED DATA (Only for Success Cases)\n\n### Step 1: Navigate and Capture\n\n1. Use Think tool to plan your approach\n2. Use `browser_navigate` to go to the target URL\n3. Take `browser_snapshot` to capture the forum page content\n4. Analyze the response to determine if extraction is possible\n\n### Step 2: Status Determination\n\n**Check for these failure conditions FIRST:**\n- Login required page / authentication needed\n- Anti-bot protection / CAPTCHA / Cloudflare challenge\n- Page errors (404, 500, timeout, etc.)\n- Inaccessible content\n\n**If any failure condition is detected:**\n- Return immediately with appropriate failed status\n- Do NOT attempt to extract data\n- Do NOT generate fake/dummy data\n\n### Step 3: Parse Thread Data (Success Only)\n\n**Instructions for successful page access:**\n\n1. **Locate Thread Entries**:\n   - Look for `row` or `cell` entries within a `table` or `rowgroup` context.\n   - Thread titles typically appear under `link` tags with recognizable patterns like `Thread-...` in the `/url` or in context mentioning \"by\" an author.\n\n2. **Extract Fields for Each Thread**:\n   - **post_title**: The text content of the main `link` for the thread.\n   - **post_link**: The `{{ $('Loop Over URLs').item.json.forum_url }}` base concatenated with the `link` url path that contains `Thread-...` and does not include `?action=lastpost`.\n   - **post_author_name**: The text name near `by` or within a `link` where author info is mentioned.\n   - **post_author_link**: The `link` URL that contains `/User-<username>` for the post author.\n   - **last_post_date**: The date/time string found near `Last Post` link or nearby metadata.\n   - **last_post_author**: The name appearing as the latest replier in the `Last Post` section.\n   - **last_post_author_link**: The link containing `/User-<username>` for the last replier.\n\n3. **Filtering**:\n   - Ignore rows that are just forum headers or pagination controls.\n   - Ensure you skip `Announcement`-type rows unless they follow the same structure.\n\n4. **Output**:\n   - Return a well-formatted JSON with success status and forum_posts array.\n   - Ensure all URLs are absolute by prepending `{{ $('Loop Over URLs').item.json.forum_url }}` where necessary.\n\n### Example Success Output:\n\n```json\n{\n  \"task_status\": \"success\",\n  \"forum_posts\": [\n    {\n      \"post_title\": \"Example Leak\",\n      \"post_link\": \"{{ $('Loop Over URLs').item.json.forum_url }}/Thread-Example-Leak\",\n      \"post_author_name\": \"Username\",\n      \"post_author_link\": \"{{ $('Loop Over URLs').item.json.forum_url }}/User-Username\",\n      \"last_post_date\": \"28-06-25, 06:00 AM\",\n      \"last_post_author\": \"Replier\",\n      \"last_post_author_link\": \"{{ $('Loop Over URLs').item.json.forum_url }}/User-Replier\"\n    }\n  ]\n}\n```\n\n### Example Failure Outputs:\n\n```json\n{\n  \"task_status\": \"failed\",\n  \"failed_cause\": \"bot_captcha\",\n  \"error_details\": \"Cloudflare protection detected on page\"\n}\n```\n\n```json\n{\n  \"task_status\": \"failed\",\n  \"failed_cause\": \"login_needed\",\n  \"error_details\": \"Page redirected to login form\"\n}\n```\n\n```json\n{\n  \"task_status\": \"failed\",\n  \"failed_cause\": \"page_unreachable\",\n  \"error_details\": \"HTTP 503 Service Unavailable\"\n}\n```\n\n---\n\n## ANTI-BOT HANDLING\n\n### ONLY if the browser_snapshot shows anti-bot protection:\n\n- Use `browser_wait_for` with time: 10 to wait for automatic bypass\n- Take another `browser_snapshot` to check if forum loaded\n- If still blocked, return failed status with \"bot_captcha\" cause\n\n### ONLY if captcha verification appears:\n\n- Use `browser_hover` then `browser_click` on verification button\n- Use `browser_wait_for` with time: 5\n- Take final `browser_snapshot` for extraction\n- If verification fails, return failed status with \"bot_captcha\" cause\n\n## CRITICAL REMINDERS\n\n1. **NEVER generate fake/dummy data** - if you can't access real data, return failed status\n2. **Always determine status first** - check for failures before attempting extraction\n3. **Follow the JSON schema strictly** - success responses need forum_posts, failed responses need failed_cause\n4. **Be precise with failure causes** - use the correct enum value for the specific situation\n5. **No mixed responses** - never include both forum_posts and failed_cause in the same response",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        1520
+      ],
+      "id": "365dfb58-fb97-4ec5-963e-64f88b1e9fd4",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Playwright MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keywords": {
+      "main": [
+        [
+          {
+            "node": "Add Posts to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase RPC Check Existing URLs": {
+      "main": [
+        [
+          {
+            "node": "Merge Only New URLs",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Inform Tracking Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Only New URLs": {
+      "main": [
+        [
+          {
+            "node": "Recompose New Posts Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out URLs to Track": {
+      "main": [
+        [
+          {
+            "node": "Loop Over URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inform Tracking Started": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inform Tracking Failed": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Posts?": {
+      "main": [
+        [
+          {
+            "node": "Split Out Forum Posts Again",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inform No New Posts Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inform No New Posts Found": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "DarkForums.st Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Agent Output": {
+      "main": [
+        [
+          {
+            "node": "Supabase RPC Check Existing URLs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out Forum Posts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inform Tracking Failed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inform Tracking Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over URLs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Inform Tracking Started",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Forum Posts": {
+      "main": [
+        [
+          {
+            "node": "Merge Only New URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recompose New Posts Array": {
+      "main": [
+        [
+          {
+            "node": "Has New Posts?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Posts to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Send Posts to Discord Feed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "DarkForums.st Metadata": {
+      "main": [
+        [
+          {
+            "node": "Split Out URLs to Track",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Forum Posts Again": {
+      "main": [
+        [
+          {
+            "node": "Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Posts to Discord Feed": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch Agent Output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inform Tracking Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b2dcbde4-229e-459b-a243-b883aecb4aa8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98e897a176d6aa8f9ebfef8f0306eab4fec5c697c6120f66479530a2b348cfea"
+  },
+  "id": "7Z8tZLfPyfMX6dCt",
+  "tags": []
+}

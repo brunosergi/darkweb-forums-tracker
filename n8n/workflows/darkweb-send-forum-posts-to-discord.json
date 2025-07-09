@@ -1,0 +1,1007 @@
+{
+  "name": "darkweb-forums-discord-1.2",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "avatar_url": "={{ $('Forums Post to Discord').item.json.forum_icon }}",
+          "username": "={{ $('Forums Post to Discord').item.json.forum_name }}",
+          "wait": true
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Last Post was` **{{ $json.last_post_date }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**",
+              "author": "={{ $('Forums Post to Discord').item.json.forum_name }}",
+              "timestamp": "=",
+              "title": "={{ $json.post_title }}",
+              "url": "={{ $json.post_link }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        432
+      ],
+      "id": "f81402da-8e84-4f1b-9c22-4ddbb19e49bf",
+      "name": "Send Normal Posts",
+      "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "avatar_url": "={{ $('Forums Post to Discord').item.json.forum_icon }}",
+          "username": "={{ $('Forums Post to Discord').item.json.forum_name }}",
+          "wait": true
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Last Post was` **{{ $json.last_post_date }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**\n> {{ $json.post_summary }}",
+              "author": "={{ $('Forums Post to Discord').item.json.forum_name }}🚨",
+              "color": "#FF0000",
+              "timestamp": "=",
+              "title": "={{ $json.post_title }}",
+              "url": "={{ $json.post_link }}",
+              "image": "={{ $json.post_screenshot_url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        672
+      ],
+      "id": "672078ba-1a11-4772-a89e-b61d291b457b",
+      "name": "Send Alert Posts",
+      "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "E8qcUyY1l5Sggdrj",
+          "name": "Discord Webhook account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2528,
+        432
+      ],
+      "id": "14e5a2ab-d4fb-4023-a226-b3684d2046b8",
+      "name": "Merge Posts"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f4b5e00a-da90-470c-ba0f-c0187e5d1107",
+                    "leftValue": "={{ $json.keyword_alert }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Normal Post"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.keyword_alert }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "295c2c43-16d4-46ba-9c9f-e923a7581b5e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Alert Post"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1824,
+        672
+      ],
+      "id": "c2665517-8726-48bf-be26-ca04c148084f",
+      "name": "Switch Post Type"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "darkweb_forums",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Switch Post Type').item.json.post_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "sent",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "sent_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        432
+      ],
+      "id": "c7a20f9c-e22e-4b30-8a47-802bc54dbe03",
+      "name": "Update Sent Status",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uf6FeLUksFchCWHS",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1824,
+        928
+      ],
+      "id": "aebc21e5-c80d-470c-a09e-0b74255e3dbf",
+      "name": "Loop Over Alert Post URLs"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        928
+      ],
+      "id": "b5342331-0ee3-43d7-bced-75509f730578",
+      "name": "Rate Limit",
+      "webhookId": "3ecf9259-8e83-44dd-b394-8e91c6f007c1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "darkweb_forums",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Alert Post URLs').item.json.post_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "post_summary",
+              "fieldValue": "={{ $('Switch Alert Agent Output').item.json.output.post_analysis.post_summary }}"
+            },
+            {
+              "fieldId": "post_screenshot_url",
+              "fieldValue": "=https://bfznynuipmrwmjogncek.supabase.co/storage/v1/object/screenshots/forum_posts/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}"
+            },
+            {
+              "fieldId": "post_visibility",
+              "fieldValue": "={{ $('Switch Alert Agent Output').item.json.output.post_analysis.post_visibility }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        928
+      ],
+      "id": "3e74b741-6bd6-479f-8061-816e96e8e7e2",
+      "name": "Update Alert Post",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uf6FeLUksFchCWHS",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.task_status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "305279dd-7b2b-471c-aba0-0c5fc195c520"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cd9e2a01-3870-4596-a50e-9288ac4fd972",
+                    "leftValue": "={{ $json.output.task_status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 1
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2528,
+        928
+      ],
+      "id": "6603fb7c-d454-42c1-b0fb-9738ffbf51bb",
+      "name": "Switch Alert Agent Output",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "darkweb_forums",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Alert Post URLs').item.json.post_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "post_summary",
+              "fieldValue": "=AI agent tried to obtain data, but an error occurred. {{ $json.error }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        1200
+      ],
+      "id": "4e64d26f-1346-49ac-84ea-e04fe9fa7ce3",
+      "name": "Update as Alert Post Error",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "uf6FeLUksFchCWHS",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/storage/v1/object/screenshots/forum_posts/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "image/jpeg"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "screenshot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3184,
+        928
+      ],
+      "id": "cc41a881-40cf-4192-8825-c2c2a74a19aa",
+      "name": "Add Screenshot File to Supabase Bucket",
+      "retryOnFail": false,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/screenshots/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}",
+        "options": {
+          "dataPropertyName": "screenshot"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        928
+      ],
+      "id": "16a08ac3-4a33-4a28-afa0-57a397c9da52",
+      "name": "Get Screenshot Local File",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5688ea5f-d50a-4dab-8505-eedad2e98342",
+              "name": "id",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.id } catch(e) { try { return $('Update as Alert Post Error').first().json.id } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "b6e68033-e0ee-4350-bbe8-f50533cd85d1",
+              "name": "monitored_at",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.monitored_at } catch(e) { try { return $('Update as Alert Post Error').first().json.monitored_at } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "a2609abe-8ba2-4825-8c93-f813a70b7b30",
+              "name": "post_title",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_title } catch(e) { try { return $('Update as Alert Post Error').first().json.post_title } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "7a7b8fc6-f376-4ae8-a3ca-b580571d099d",
+              "name": "post_link",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_link } catch(e) { try { return $('Update as Alert Post Error').first().json.post_link } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "e25c5f01-255a-402d-bd37-6431987f4196",
+              "name": "post_author_name",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_author_name } catch(e) { try { return $('Update as Alert Post Error').first().json.post_author_name } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "9726ec64-085c-430e-af3d-553b2fd15e91",
+              "name": "post_author_link",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_author_link } catch(e) { try { return $('Update as Alert Post Error').first().json.post_author_link } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "c8c728b4-592b-43d3-b38e-c537020779d6",
+              "name": "post_visibility",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_visibility } catch(e) { try { return $('Update as Alert Post Error').first().json.post_visibility } catch(e) { return 'error' } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "50f07185-3757-4fa1-986a-83f403bdb8fb",
+              "name": "post_summary",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_summary } catch(e) { try { return $('Update as Alert Post Error').first().json.post_summary } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "47de6d4d-fb16-4bfa-8525-9ba2764980d9",
+              "name": "post_screenshot_url",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_screenshot_url } catch(e) { try { return $('Update as Alert Post Error').first().json.post_screenshot_url } catch(e) { return '' } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "8ae8a1ca-3dc9-4d61-9eb1-5c2a6c9d5864",
+              "name": "last_post_date",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.last_post_date } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_date } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "b78a423c-b221-4741-a003-fd8dfe8c36fd",
+              "name": "last_post_author",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.last_post_author } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_author } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
+              "id": "a9f61f5d-2236-43b2-83bc-a3c518e38e38",
+              "name": "last_post_author_link",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.last_post_author_link } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_author_link } catch(e) { return null } } })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3488,
+        1472
+      ],
+      "id": "28c92882-d2dd-49b0-9229-03e691478b5e",
+      "name": "Alert Post Structure"
+    },
+    {
+      "parameters": {
+        "command": "=rm -f /screenshots/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        1200
+      ],
+      "id": "84fe4566-2594-4076-9d59-aca79042da79",
+      "name": "Delete Screenshot Local File"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"task_status\": {\n      \"type\": \"string\",\n      \"enum\": [\"success\", \"failed\"],\n      \"description\": \"Status of the post analysis task\"\n    },\n    \"failed_cause\": {\n      \"type\": \"string\",\n      \"enum\": [\"login_needed\", \"bot_captcha\", \"page_unreachable\"],\n      \"description\": \"Reason for task failure (only present when task_status is 'failed')\"\n    },\n    \"error_details\": {\n      \"type\": \"string\",\n      \"description\": \"Additional details about the error (optional for failed tasks)\"\n    },\n    \"post_analysis\": {\n      \"type\": \"object\",\n      \"description\": \"Analysis results of the forum post (only present when task_status is 'success')\",\n      \"properties\": {\n        \"post_visibility\": {\n          \"type\": \"string\",\n          \"enum\": [\"visible\", \"hidden\", \"partial\"],\n          \"description\": \"Whether the post content is fully visible, hidden behind login, or partially visible\"\n        },\n        \"post_summary\": {\n          \"type\": \"string\",\n          \"description\": \"Analytical summary of the post content and context (max 500 characters)\"\n        },\n        \"screenshot_filename\": {\n          \"type\": \"string\",\n          \"description\": \"Filename of the captured screenshot\"\n        }\n      },\n      \"required\": [\n        \"post_visibility\", \n        \"post_summary\",\n        \"screenshot_filename\"\n      ],\n      \"additionalProperties\": false\n    }\n  },\n  \"required\": [\"task_status\"],\n  \"if\": {\n    \"properties\": {\n      \"task_status\": {\n        \"const\": \"success\"\n      }\n    }\n  },\n  \"then\": {\n    \"required\": [\"post_analysis\"],\n    \"not\": {\n      \"required\": [\"failed_cause\"]\n    }\n  },\n  \"else\": {\n    \"if\": {\n      \"properties\": {\n        \"task_status\": {\n          \"const\": \"failed\"\n        }\n      }\n    },\n    \"then\": {\n      \"required\": [\"failed_cause\"],\n      \"not\": {\n        \"required\": [\"post_analysis\"]\n      }\n    }\n  },\n  \"additionalProperties\": false\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        1424
+      ],
+      "id": "b55eafbf-2000-46df-bdd3-7e01e0869a2c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        1488
+      ],
+      "id": "fbc77d2d-c540-48be-a16f-0c61a45c07ef",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "description": "You are analyzing a specific forum post page and your goal is to capture a screenshot and generate an analytical summary while maintaining natural, human-like behavior.\n\nYour job is to:\n- Plan natural interaction patterns for post analysis\n- Be patient and let the post page load completely\n- Handle blockers (CAPTCHA/DDoS/Cloudflare) with human-like timing:\n  * Hover before clicking verification buttons\n  * Wait natural intervals for page loads\n  * Type responses with variable speed if needed\n- Navigate the post content with smooth scrolling and natural pauses\n- Capture high-quality screenshots of the full viewport\n- Analyze visible content (title, author, replies, metadata) even when main content is hidden\n- Extract contextual information from thread discussions\n- Stay within the current post URL\n- Generate concise, analytical summaries under 500 characters\n\nRemember:\n1. Every action should mimic human reading behavior\n2. Add random delays between operations\n3. Use mouse movement before interactions\n4. Scroll through content naturally to view full post\n5. Handle login prompts vs. hidden content correctly:\n   - Page redirect to login = FAILED\n   - \"Login to view content\" message = SUCCESS (hidden content)\n6. Take screenshot AFTER content fully loads\n7. Analyze all visible elements for summary context\n\nAlways focus on: navigate naturally, handle challenges like a human, capture comprehensive screenshots, analyze stealthily."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        1488
+      ],
+      "id": "e582e3e0-b1f2-41a1-8d9d-e255d0cc82c2",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://host.docker.internal:8831/sse",
+        "include": "except",
+        "excludeTools": [
+          "browser_file_upload",
+          "browser_install",
+          "browser_pdf_save",
+          "browser_drag",
+          "browser_generate_playwright_test"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        1488
+      ],
+      "id": "e9a5c9fc-f51a-4b46-b9d8-207b7af2dd63",
+      "name": "Playwright MCP"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "forum_name",
+              "type": "any"
+            },
+            {
+              "name": "forum_url_path",
+              "type": "any"
+            },
+            {
+              "name": "forum_icon",
+              "type": "any"
+            },
+            {
+              "name": "post_id"
+            },
+            {
+              "name": "post_title"
+            },
+            {
+              "name": "post_link"
+            },
+            {
+              "name": "post_author_name"
+            },
+            {
+              "name": "post_author_link"
+            },
+            {
+              "name": "last_post_date"
+            },
+            {
+              "name": "last_post_author"
+            },
+            {
+              "name": "last_post_author_link"
+            },
+            {
+              "name": "screenshot_filename"
+            },
+            {
+              "name": "keyword_alert",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "8631e750-ff14-438e-84e0-556bb763c83e",
+      "typeVersion": 1.1,
+      "name": "Forums Post to Discord",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1824,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "options": {
+          "username": "DarkWeb Forums",
+          "wait": true
+        },
+        "embeds": {
+          "values": [
+            {
+              "description": "=### {{ $('Forums Post to Discord').first().json.forum_name }}\n- {{ $('Forums Post to Discord').first().json.forum_url_path }}\n`Success Forum Tracking • Check the posts above`",
+              "author": "✅ Forum tracking completed",
+              "color": "#2ECC71",
+              "timestamp": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        672
+      ],
+      "id": "545f8315-5779-4097-9164-0f9faa0917d4",
+      "name": "Inform Tracking Completed",
+      "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
+      "executeOnce": true,
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "E8qcUyY1l5Sggdrj",
+          "name": "Discord Webhook account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.post_link }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI agent responsible for parsing ARIA snapshot YAML data from a specific {{ $('Forums Post to Discord').item.json.forum_name }} post page using Playwright MCP tools. Your task is to access the forum post URL, capture a screenshot, and generate an analytical summary while handling various access scenarios.\n\n## IMPORTANT: OUTPUT STATUS HANDLING\n\nYour response MUST follow these status rules:\n\n### SUCCESS SCENARIO (task_status: \"success\")\n- When you successfully access the post page (even if content is hidden)\n- Output format: `{\"task_status\": \"success\", \"post_analysis\": {...}}`\n- Include screenshot and summary even for hidden content posts\n- NEVER include \"failed_cause\" in success responses\n\n### FAILURE SCENARIOS (task_status: \"failed\")  \n- When you cannot access the post page at all\n- Output format: `{\"task_status\": \"failed\", \"failed_cause\": \"reason\", \"error_details\": \"optional details\"}`\n- NEVER include \"post_analysis\" in failed responses\n\n**Failed Cause Options:**\n- `\"login_needed\"`: When page redirects to login/authentication form\n- `\"bot_captcha\"`: When blocked by anti-bot systems, CAPTCHA, or Cloudflare protection  \n- `\"page_unreachable\"`: When page returns errors, times out, or is completely inaccessible\n\n**CRITICAL DISTINCTION:**\n- **FAILED login_needed**: Page redirects to login form/authentication page\n- **SUCCESS with hidden content**: Page loads but shows \"You must register or login to view this content\" - this is SUCCESS, not failure!\n\n---\n\n## POST ANALYSIS PROCESS\n\n### Step 1: Navigate and Initial Assessment\n\n1. Use Think tool to plan your approach\n2. Use `browser_navigate` to go to the target post URL: `{{ $json.post_link }}`\n3. Take `browser_snapshot` to capture the page content\n4. Determine if this is a failure scenario or success scenario\n\n### Step 2: Status Determination\n\n**Check for FAILURE conditions FIRST:**\n- Page redirected to login/authentication form\n- Anti-bot protection / CAPTCHA / Cloudflare challenge  \n- Page errors (404, 500, timeout, etc.)\n- Complete inaccessibility\n\n**If any failure condition detected:**\n- Return immediately with failed status\n- Do NOT attempt screenshot or analysis\n\n### Step 3: Success Processing (Screenshot + Analysis)\n\n**If page loads successfully (even with hidden content):**\n\n#### A. Take Screenshot\n1. Generate screenshot filename using these rules:\n   - Remove schema and domain from `{{ $json.post_link }}` (keep only the URL path)\n   - Remove any leading slash from the path\n   - Keep all existing hyphens in the path\n   - Add identifier `{{ $json.post_id }}` at beginning with hyphen separator\n   - Append '.jpeg' extension\n   - Final screenshot filename: \n     - `{{ $json.screenshot_filename }}`\n\n2. **MANDATORY**: Use `browser_take_screenshot` tool with:\n   - `filename`: Use the generated filename\n   - `raw`: Set to false (JPEG format)\n   - Do NOT use `element` or `ref` parameters (full viewport)\n\n#### B. Content Analysis\n1. **Determine Content Status**:\n   - `\"visible\"`: Post content is fully accessible\n   - `\"hidden\"`: Content blocked by \"register/login to view\" message\n   - `\"partial\"`: Some content visible, some hidden\n\n2. **Extract Available Information**:\n   - Post title from page header/breadcrumbs\n   - Author username and profile link if visible\n   - Post date, replies count, views count if available\n   - Any visible thread context, replies, or metadata\n\n3. **Generate Summary** (MUST be under 500 characters):\n   - Analyze all available information (title, context, replies, metadata)\n   - For hidden content: summarize based on title, author, and any visible thread discussion\n   - For visible content: provide analytical summary of the actual post content\n   - Focus on what the post is about, its significance, and key points\n\n### Example Success Outputs:\n\n**Visible Content:**\n```json\n{\n  \"task_status\": \"success\",\n  \"post_analysis\": {\n    \"post_visibility\": \"visible\",\n    \"post_summary\": \"Post claims to share recent CIA database leak. Author Jigsaw presents download links and technical details. Multiple users discuss verification methods and express interest. High engagement suggests credible breach claim.\",\n    \"screenshot_filename\": \"12345-CIA-DB-Leak.jpeg\"\n  }\n}\n```\n\n**Hidden Content:**\n```json\n{\n  \"task_status\": \"success\", \n  \"post_analysis\": {\n    \"post_visibility\": \"hidden\",\n    \"post_summary\": \"CIA-related data breach post by user Jigsaw. Content hidden behind login but thread shows 220K+ views and active discussion. Based on replies, appears to involve recent intelligence database leak with verification discussions.\",\n    \"screenshot_filename\": \"12345-CIA-DB-Leak.jpeg\"\n  }\n}\n```\n\n**Failure Example:**\n```json\n{\n  \"task_status\": \"failed\",\n  \"failed_cause\": \"bot_captcha\", \n  \"error_details\": \"Cloudflare protection preventing page access\"\n}\n```\n\n---\n\n## ANTI-BOT HANDLING\n\n### IF browser_snapshot shows anti-bot protection:\n- Use `browser_wait_for` with time: 10 for automatic bypass\n- Take another `browser_snapshot` to check if page loaded\n- If still blocked, return failed status with \"bot_captcha\"\n\n### IF captcha verification appears:\n- Use `browser_hover` then `browser_click` on verification button\n- Use `browser_wait_for` with time: 5\n- Take final `browser_snapshot`\n- If verification fails, return failed status with \"bot_captcha\"\n\n---\n\n## CRITICAL REMINDERS\n\n1. **Screenshot is MANDATORY** for all success cases\n2. **Hidden content ≠ Failed login** - treat hidden content as success\n3. **Extract context from visible elements** even when main content is hidden\n4. **Summary must be under 500 characters** and analytical\n5. **Never generate fake data** - if page fails to load, return failed status\n6. **Follow conditional schema strictly** - success needs post_analysis, failed needs failed_cause",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        2144,
+        1200
+      ],
+      "id": "d8be2b21-13b2-4a98-8249-95aff6fa7ff7",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send Normal Posts": {
+      "main": [
+        [
+          {
+            "node": "Merge Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert Posts": {
+      "main": [
+        [
+          {
+            "node": "Merge Posts",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        []
+      ]
+    },
+    "Merge Posts": {
+      "main": [
+        [
+          {
+            "node": "Update Sent Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Post Type": {
+      "main": [
+        [
+          {
+            "node": "Send Normal Posts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Alert Post URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sent Status": {
+      "main": [
+        [
+          {
+            "node": "Inform Tracking Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Loop Over Alert Post URLs": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Posts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Alert Agent Output": {
+      "main": [
+        [
+          {
+            "node": "Get Screenshot Local File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update as Alert Post Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update as Alert Post Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Alert Post": {
+      "main": [
+        [
+          {
+            "node": "Delete Screenshot Local File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Update as Alert Post Error": {
+      "main": [
+        [
+          {
+            "node": "Delete Screenshot Local File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Add Screenshot File to Supabase Bucket": {
+      "main": [
+        [
+          {
+            "node": "Update Alert Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update as Alert Post Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Screenshot Local File": {
+      "main": [
+        [
+          {
+            "node": "Add Screenshot File to Supabase Bucket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update as Alert Post Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Post Structure": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Alert Post URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Screenshot Local File": {
+      "main": [
+        [
+          {
+            "node": "Alert Post Structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Playwright MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forums Post to Discord": {
+      "main": [
+        [
+          {
+            "node": "Switch Post Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inform Tracking Completed": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch Alert Agent Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d9fcc112-b173-4d02-a2cf-1fed4b6efb72",
+  "meta": {
+    "instanceId": "98e897a176d6aa8f9ebfef8f0306eab4fec5c697c6120f66479530a2b348cfea"
+  },
+  "id": "MjpLUuPr5mek7iVx",
+  "tags": []
+}
