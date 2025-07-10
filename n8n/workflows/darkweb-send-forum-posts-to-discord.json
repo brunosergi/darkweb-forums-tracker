@@ -1,5 +1,5 @@
 {
-  "name": "darkweb-forums-discord-1.2",
+  "name": "darkweb-send-forum-posts-to-discord",
   "nodes": [
     {
       "parameters": {
@@ -24,12 +24,18 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        2144,
-        432
+        16,
+        128
       ],
-      "id": "f81402da-8e84-4f1b-9c22-4ddbb19e49bf",
+      "id": "ed76d729-52e0-46de-ab58-a2090f40facd",
       "name": "Send Normal Posts",
       "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "xqXcOV565MNG0nSM",
+          "name": "Discord Webhook account"
+        }
+      },
       "onError": "continueErrorOutput"
     },
     {
@@ -57,15 +63,15 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        2144,
-        672
+        16,
+        368
       ],
-      "id": "672078ba-1a11-4772-a89e-b61d291b457b",
+      "id": "366ce8d6-0a47-4961-a355-8ac4d7d2df00",
       "name": "Send Alert Posts",
       "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
       "credentials": {
         "discordWebhookApi": {
-          "id": "E8qcUyY1l5Sggdrj",
+          "id": "xqXcOV565MNG0nSM",
           "name": "Discord Webhook account"
         }
       },
@@ -76,10 +82,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2528,
-        432
+        400,
+        128
       ],
-      "id": "14e5a2ab-d4fb-4023-a226-b3684d2046b8",
+      "id": "a8fa5068-98ea-4bf7-959a-0399b628d197",
       "name": "Merge Posts"
     },
     {
@@ -144,10 +150,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1824,
-        672
+        -304,
+        368
       ],
-      "id": "c2665517-8726-48bf-be26-ca04c148084f",
+      "id": "df3a2748-7051-4377-ae2e-4e0224b961bb",
       "name": "Switch Post Type"
     },
     {
@@ -179,15 +185,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2880,
-        432
+        752,
+        128
       ],
-      "id": "c7a20f9c-e22e-4b30-8a47-802bc54dbe03",
+      "id": "9909969c-8327-40d5-9f69-652a0f0ad2ee",
       "name": "Update Sent Status",
       "alwaysOutputData": false,
       "credentials": {
         "supabaseApi": {
-          "id": "uf6FeLUksFchCWHS",
+          "id": "lDEgB2aVZXWmx1nk",
           "name": "Supabase account"
         }
       },
@@ -200,10 +206,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1824,
-        928
+        -304,
+        624
       ],
-      "id": "aebc21e5-c80d-470c-a09e-0b74255e3dbf",
+      "id": "c83d538c-49c4-48c2-a1eb-f359c18524fc",
       "name": "Loop Over Alert Post URLs"
     },
     {
@@ -213,10 +219,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        2144,
-        928
+        16,
+        624
       ],
-      "id": "b5342331-0ee3-43d7-bced-75509f730578",
+      "id": "6ddb89a9-d7bf-4db8-a218-622999d4e0d0",
       "name": "Rate Limit",
       "webhookId": "3ecf9259-8e83-44dd-b394-8e91c6f007c1"
     },
@@ -253,15 +259,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        3488,
-        928
+        1360,
+        624
       ],
-      "id": "3e74b741-6bd6-479f-8061-816e96e8e7e2",
+      "id": "3874567c-81ec-46d8-856e-98cd89f6b8c9",
       "name": "Update Alert Post",
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "uf6FeLUksFchCWHS",
+          "id": "lDEgB2aVZXWmx1nk",
           "name": "Supabase account"
         }
       },
@@ -329,10 +335,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2528,
-        928
+        400,
+        624
       ],
-      "id": "6603fb7c-d454-42c1-b0fb-9738ffbf51bb",
+      "id": "14a26cdc-0ce4-47ed-a9a5-af7ab487c059",
       "name": "Switch Alert Agent Output",
       "onError": "continueErrorOutput"
     },
@@ -361,15 +367,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2880,
-        1200
+        752,
+        896
       ],
-      "id": "4e64d26f-1346-49ac-84ea-e04fe9fa7ce3",
+      "id": "d5dcdbd5-5274-4096-91fe-59303e99fd1a",
       "name": "Update as Alert Post Error",
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "uf6FeLUksFchCWHS",
+          "id": "lDEgB2aVZXWmx1nk",
           "name": "Supabase account"
         }
       },
@@ -402,14 +408,20 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3184,
-        928
+        1056,
+        624
       ],
-      "id": "cc41a881-40cf-4192-8825-c2c2a74a19aa",
+      "id": "827704b2-87a3-4888-8898-9806250bfd21",
       "name": "Add Screenshot File to Supabase Bucket",
       "retryOnFail": false,
       "maxTries": 2,
       "waitBetweenTries": 5000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "lDEgB2aVZXWmx1nk",
+          "name": "Supabase account"
+        }
+      },
       "onError": "continueErrorOutput"
     },
     {
@@ -422,10 +434,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        2880,
-        928
+        752,
+        624
       ],
-      "id": "16a08ac3-4a33-4a28-afa0-57a397c9da52",
+      "id": "b2f0894b-9cd2-4175-b514-f8c375a688f9",
       "name": "Get Screenshot Local File",
       "executeOnce": false,
       "alwaysOutputData": true,
@@ -514,10 +526,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3488,
-        1472
+        1360,
+        1168
       ],
-      "id": "28c92882-d2dd-49b0-9229-03e691478b5e",
+      "id": "1f4c6b68-e5ef-4fc3-8996-aa090e9f3b32",
       "name": "Alert Post Structure"
     },
     {
@@ -527,10 +539,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        3488,
-        1200
+        1360,
+        896
       ],
-      "id": "84fe4566-2594-4076-9d59-aca79042da79",
+      "id": "0e0dcb70-4b21-4e13-b9e2-d3a6c036f3a9",
       "name": "Delete Screenshot Local File"
     },
     {
@@ -542,10 +554,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        2128,
-        1424
+        0,
+        1120
       ],
-      "id": "b55eafbf-2000-46df-bdd3-7e01e0869a2c",
+      "id": "5ada7822-07eb-41aa-a21a-771f4d84ecd3",
       "name": "Structured Output Parser"
     },
     {
@@ -556,11 +568,17 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        2000,
-        1488
+        -128,
+        1184
       ],
-      "id": "fbc77d2d-c540-48be-a16f-0c61a45c07ef",
-      "name": "Google Gemini Chat Model"
+      "id": "85ad7c5d-bf01-4e5d-9476-3c80eb61d292",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "AWUhNNtLS5BaQvTz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
@@ -569,10 +587,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolThink",
       "typeVersion": 1,
       "position": [
-        2416,
-        1488
+        288,
+        1184
       ],
-      "id": "e582e3e0-b1f2-41a1-8d9d-e255d0cc82c2",
+      "id": "cb2a56f7-625b-4b4f-85b6-3ec4162567d6",
       "name": "Think"
     },
     {
@@ -590,10 +608,10 @@
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
       "typeVersion": 1,
       "position": [
-        2560,
-        1488
+        432,
+        1184
       ],
-      "id": "e9a5c9fc-f51a-4b46-b9d8-207b7af2dd63",
+      "id": "bb2e3f76-5592-4989-977a-c6ea390362d6",
       "name": "Playwright MCP"
     },
     {
@@ -646,13 +664,13 @@
           ]
         }
       },
-      "id": "8631e750-ff14-438e-84e0-556bb763c83e",
+      "id": "d2751f31-db84-4567-a86e-bc89b6ab7dc2",
       "typeVersion": 1.1,
       "name": "Forums Post to Discord",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        1824,
-        432
+        -304,
+        128
       ]
     },
     {
@@ -676,16 +694,16 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        2528,
-        672
+        400,
+        368
       ],
-      "id": "545f8315-5779-4097-9164-0f9faa0917d4",
+      "id": "84c1a506-4b77-448b-9608-b0f6a5d167bd",
       "name": "Inform Tracking Completed",
       "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
       "executeOnce": true,
       "credentials": {
         "discordWebhookApi": {
-          "id": "E8qcUyY1l5Sggdrj",
+          "id": "xqXcOV565MNG0nSM",
           "name": "Discord Webhook account"
         }
       },
@@ -704,10 +722,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        2144,
-        1200
+        16,
+        896
       ],
-      "id": "d8be2b21-13b2-4a98-8249-95aff6fa7ff7",
+      "id": "071138ab-dfae-4e40-b1a2-b87d8e6b0479",
       "name": "AI Agent",
       "retryOnFail": true,
       "maxTries": 2,
@@ -736,8 +754,7 @@
             "type": "main",
             "index": 1
           }
-        ],
-        []
+        ]
       ]
     },
     "Merge Posts": {
@@ -777,8 +794,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Loop Over Alert Post URLs": {
@@ -843,8 +859,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Update as Alert Post Error": {
@@ -855,8 +870,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Add Screenshot File to Supabase Bucket": {
@@ -977,11 +991,6 @@
         ]
       ]
     },
-    "Inform Tracking Completed": {
-      "main": [
-        []
-      ]
-    },
     "AI Agent": {
       "main": [
         [
@@ -998,10 +1007,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d9fcc112-b173-4d02-a2cf-1fed4b6efb72",
+  "versionId": "39dc0572-e5e6-4161-a923-4d679eadf682",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "98e897a176d6aa8f9ebfef8f0306eab4fec5c697c6120f66479530a2b348cfea"
   },
-  "id": "MjpLUuPr5mek7iVx",
+  "id": "jcpIiCxbvrHkOY2L",
   "tags": []
 }

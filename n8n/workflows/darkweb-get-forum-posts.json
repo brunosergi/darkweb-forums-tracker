@@ -1,5 +1,5 @@
 {
-  "name": "darkweb-forums-1.8",
+  "name": "darkweb-get-forum-posts",
   "nodes": [
     {
       "parameters": {
@@ -10,44 +10,23 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        -208,
-        1792
+        288,
+        896
       ],
-      "id": "ee3ba327-6a1f-4cc3-9fc4-4920309a6e5d",
+      "id": "27742a08-e3fe-45b5-b011-c02cd0574044",
       "name": "Structured Output Parser"
     },
     {
       "parameters": {
-        "sseEndpoint": "http://host.docker.internal:8831/sse",
-        "include": "except",
-        "excludeTools": [
-          "browser_file_upload",
-          "browser_install",
-          "browser_pdf_save",
-          "browser_drag",
-          "browser_generate_playwright_test"
-        ]
-      },
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1,
-      "position": [
-        224,
-        1792
-      ],
-      "id": "e5b8f6a6-282d-4a24-a691-932e60cd32c3",
-      "name": "Playwright MCP"
-    },
-    {
-      "parameters": {
-        "description": "You are scanning a specific forum page and your goal is to extract the visible list of post threads while maintaining natural, human-like behavior.\n\nYour job is to:\n- Plan natural interaction patterns\n- Be patient and let pages load naturally\n- Handle blockers (CAPTCHA/DDoS) with human-like timing:\n  * Hover before clicking\n  * Wait natural intervals\n  * Type responses with variable speed\n- Extract data with smooth scrolling and natural pauses\n- Stay within the current URL\n- Structure the extracted forum post threads correctly\n\nRemember:\n1. Every action should mimic human behavior\n2. Add random delays between operations\n3. Use mouse movement before clicks\n4. Scroll content naturally\n5. Type with variable speed when needed\n6. Handle challenges patiently and naturally\n\nAlways focus on: navigate naturally, handle challenges like a human, extract data stealthily."
+        "description": "=## Using the think tool\n\nBefore taking any action or responding after receiving tool results, use the think tool as a scratchpad to:\n- List the specific rules that apply to the current forum extraction request\n- Check if navigation and data access was successful\n- Verify that extracted data is real (not fake/example data)\n- Plan the correct response status based on actual results\n\nHere are examples of what to iterate over inside the think tool:\n\n<think_tool_example_1>\nForum page extraction request for DarkForums.st\n- Rules to verify:\n  * Must navigate to actual URL successfully\n  * Must capture real browser snapshot\n  * Must extract only real thread data from snapshot\n  * Never generate fake/example data\n- Status determination:\n  * If navigation failed → \"page_unreachable\"\n  * If CAPTCHA/DDoS-Guard detected → \"bot_captcha\"\n  * If login redirect → \"login_needed\"\n  * If real data extracted → \"success\" \n- Plan: Navigate → snapshot → verify real content → extract real data only\n</think_tool_example_1>\n\n<think_tool_example_2>\nBrowser navigation completed, checking snapshot results\n- Navigation status: ✅ Success - no timeouts or errors\n- Snapshot content analysis:\n  * Page shows: Real forum layout with thread listings\n  * Thread titles visible: \"Morocco PMMP Database\", \"Twitter Leak 200M\"\n  * Authors visible: \"B4baYega\", \"Lucifer\" \n  * Real dates: \"1 minute ago\", \"40 minutes ago\"\n- Data validation:\n  * All thread data comes from actual snapshot ✅\n  * No fake usernames like \"Username\" or \"Example\" ✅\n  * URLs are real forum paths ✅\n- Plan: Extract real data and return success status with actual forum posts\n</think_tool_example_2>\n\n<think_tool_example_3>\nBrowser navigation attempt results\n- Navigation status: ❌ Failed - connection timeout after 30s\n- Error details: \"net::ERR_TIMED_OUT\"\n- Snapshot result: No usable content captured\n- Data available: None - cannot extract anything\n- Rules check:\n  * Cannot generate fake data ✅\n  * Must report navigation failure ✅\n- Plan: Return failed status with \"page_unreachable\" and error details\n</think_tool_example_3>"
       },
       "type": "@n8n/n8n-nodes-langchain.toolThink",
       "typeVersion": 1,
       "position": [
-        80,
-        1792
+        576,
+        896
       ],
-      "id": "21f6daba-ad89-4647-b7e6-1d9d93561c5c",
+      "id": "d3cec01e-08f7-4e30-a920-b48f578e05de",
       "name": "Think"
     },
     {
@@ -68,10 +47,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1424,
-        1024
+        1920,
+        128
       ],
-      "id": "7728802c-0f24-4970-9d9c-8239f885d4ae",
+      "id": "768765bf-cf09-491e-a732-53b6e2108b14",
       "name": "Keywords"
     },
     {
@@ -97,17 +76,17 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        528,
-        1264
+        1024,
+        368
       ],
-      "id": "3522148e-4614-45f6-9154-8d44bc582266",
+      "id": "0d88c854-ab25-4cd0-8d12-b98d14d7d919",
       "name": "Supabase RPC Check Existing URLs",
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
       "credentials": {
         "supabaseApi": {
-          "id": "uf6FeLUksFchCWHS",
+          "id": "lDEgB2aVZXWmx1nk",
           "name": "Supabase account"
         }
       },
@@ -132,10 +111,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        848,
-        1024
+        1344,
+        128
       ],
-      "id": "a9218783-f446-49fe-a71c-836f62781766",
+      "id": "5297ad3f-29f4-4bba-8ebe-e281e593300d",
       "name": "Merge Only New URLs",
       "alwaysOutputData": true
     },
@@ -148,10 +127,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        160,
-        1024
+        656,
+        128
       ],
-      "id": "20544b75-bb03-4cf3-be13-2fa9efd1dc56",
+      "id": "422082ef-5a9b-4f4a-8768-ef40d1b602f7",
       "name": "Split Out URLs to Track"
     },
     {
@@ -175,15 +154,15 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        -160,
-        1264
+        336,
+        368
       ],
-      "id": "0e246dfa-c1b1-49f3-a665-a5fdd62834e4",
+      "id": "5474592b-0853-4034-8d86-7c3470614ff2",
       "name": "Inform Tracking Started",
       "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
       "credentials": {
         "discordWebhookApi": {
-          "id": "E8qcUyY1l5Sggdrj",
+          "id": "xqXcOV565MNG0nSM",
           "name": "Discord Webhook account"
         }
       }
@@ -198,7 +177,7 @@
         "embeds": {
           "values": [
             {
-              "description": "=### {{ $('Loop Over URLs').item.json.forum_name }}\n- {{ $('Loop Over URLs').item.json.forum_url_path }}\n> AI agent tried to obtain data, but an error occurred. {{ $json.output.error_details }}\n`Check workflow logs • Manual review required`",
+              "description": "=### {{ $('Loop Over URLs').item.json.forum_name }}\n- {{ $('Loop Over URLs').item.json.forum_url_path }}\n> AI agent tried to obtain data, but an error occurred.\n> {{ (() => { try { return $json.output.error_details } catch(e) { try { return $json.error } catch(e) { return 'Unknown error occurred' } } })() }}\n`Check workflow logs • Manual review required`",
               "author": "=⚠️ Forum tracking failed",
               "color": "#E74C3C",
               "timestamp": "={{ $now.toISO() }}"
@@ -209,17 +188,17 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        528,
-        1760
+        1024,
+        880
       ],
-      "id": "265495d3-f050-4208-a6da-0738f688f206",
+      "id": "e66f2fd8-d801-43bd-bda0-13a12cc64d69",
       "name": "Inform Tracking Failed",
       "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
       "executeOnce": true,
       "retryOnFail": false,
       "credentials": {
         "discordWebhookApi": {
-          "id": "E8qcUyY1l5Sggdrj",
+          "id": "xqXcOV565MNG0nSM",
           "name": "Discord Webhook account"
         }
       }
@@ -253,10 +232,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        848,
-        1264
+        1344,
+        368
       ],
-      "id": "d223db5a-ab40-4cff-80f4-c083edd221b6",
+      "id": "2c91652b-c8c5-423d-8eef-8307fc18a853",
       "name": "Has New Posts?"
     },
     {
@@ -280,16 +259,16 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        848,
-        1520
+        1344,
+        624
       ],
-      "id": "d424cea1-a9f8-4cf2-a31d-68951b31f737",
+      "id": "fb52156b-9f33-4428-8bb8-086ca3614da6",
       "name": "Inform No New Posts Found",
       "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
       "executeOnce": true,
       "credentials": {
         "discordWebhookApi": {
-          "id": "E8qcUyY1l5Sggdrj",
+          "id": "xqXcOV565MNG0nSM",
           "name": "Discord Webhook account"
         }
       }
@@ -308,10 +287,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -416,
-        1024
+        80,
+        128
       ],
-      "id": "30bfa28d-9bc0-4d44-a3b3-662d649dacd0",
+      "id": "a73f1459-06d8-4857-a793-d280430524f7",
       "name": "Schedule Trigger"
     },
     {
@@ -322,14 +301,14 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -384,
-        1792
+        112,
+        896
       ],
-      "id": "646c0d3b-967f-4d21-8611-d460987d6e9a",
+      "id": "c71098c9-662e-4ff0-9505-53db866f6243",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
-          "id": "0skcS8gMjB4IiGFN",
+          "id": "AWUhNNtLS5BaQvTz",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -396,10 +375,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        160,
-        1264
+        656,
+        368
       ],
-      "id": "70be9826-cfcb-4222-9327-bc5d57dec4ff",
+      "id": "1a1fc261-4dea-450f-9f96-a68c755d9d79",
       "name": "Switch Agent Output",
       "onError": "continueErrorOutput"
     },
@@ -410,10 +389,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -416,
-        1264
+        80,
+        368
       ],
-      "id": "584ad814-a66a-42de-83eb-5994c90b00f6",
+      "id": "8e965f31-f344-4b79-96c2-ddb99581deff",
       "name": "Loop Over URLs",
       "executeOnce": false
     },
@@ -425,10 +404,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        528,
-        1024
+        1024,
+        128
       ],
-      "id": "a89643ca-16f4-42e8-afb9-c726d309d081",
+      "id": "3767ec8e-bec4-4fd6-8a5b-91bc11a3e09b",
       "name": "Split Out Forum Posts"
     },
     {
@@ -440,10 +419,10 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        1152,
-        1024
+        1648,
+        128
       ],
-      "id": "a86babe7-f067-4fd9-81be-1608db6eb0ac",
+      "id": "7441ea39-22ce-482d-a56e-5dd7bb8e64ff",
       "name": "Recompose New Posts Array"
     },
     {
@@ -501,14 +480,14 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1424,
-        1264
+        1920,
+        368
       ],
-      "id": "4f69f84e-9713-4e73-ad0f-1356e7a4127f",
+      "id": "544f4aa2-5cb2-404b-adf9-a56e576fe335",
       "name": "Add Posts to Supabase",
       "credentials": {
         "supabaseApi": {
-          "id": "uf6FeLUksFchCWHS",
+          "id": "lDEgB2aVZXWmx1nk",
           "name": "Supabase account"
         }
       },
@@ -539,7 +518,7 @@
             {
               "id": "e084011b-ec05-4f17-bd25-d448a4ea3eb6",
               "name": "forum_url_path[0]",
-              "value": "https://darkforums.st/Forum-Databases",
+              "value": "https://darkforums.st/Forum-Other-Leaks",
               "type": "string"
             }
           ]
@@ -549,10 +528,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -160,
-        1024
+        336,
+        128
       ],
-      "id": "429b022b-faf1-4123-b6d4-9934688b60af",
+      "id": "3afe1f20-6f62-488e-a20d-a2aee1f7d97f",
       "name": "DarkForums.st Metadata"
     },
     {
@@ -562,10 +541,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1424,
-        1760
+        1920,
+        880
       ],
-      "id": "27b86ef9-c2e2-46a9-81c4-4df76dea2207",
+      "id": "b7c1b69e-7baa-42f0-8ebd-de05f789666e",
       "name": "Wait",
       "webhookId": "34f815ed-1095-4ad1-8a61-18b42ca04db0"
     },
@@ -579,30 +558,30 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1152,
-        1264
+        1648,
+        368
       ],
-      "id": "c2555b9b-c1f5-47a5-a086-f22caa2b8bfe",
+      "id": "c70cd20b-05a2-4afb-a307-64d08e32de56",
       "name": "Split Out Forum Posts Again"
     },
     {
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "MjpLUuPr5mek7iVx",
+          "value": "jcpIiCxbvrHkOY2L",
           "mode": "list",
-          "cachedResultName": "darkweb-forums-discord-1.1"
+          "cachedResultName": "darkweb-send-forum-posts-to-discord"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "forum_icon": "={{ $('Loop Over URLs').item.json.forum_icon }}",
             "forum_name": "={{ $json.forum_name }}",
             "forum_url_path": "={{ $json.forum_url }}",
             "keyword_alert": "={{ $json.keyword_alert }}",
+            "forum_icon": "={{ $('Loop Over URLs').item.json.forum_icon }}",
             "post_id": "={{ $json.id }}",
-            "post_link": "={{ $json.post_link }}",
             "post_title": "={{ $json.post_title }}",
+            "post_link": "={{ $json.post_link }}",
             "post_author_name": "={{ $json.post_author_name }}",
             "post_author_link": "={{ $json.post_author_link }}",
             "last_post_date": "={{ $json.last_post_date }}",
@@ -610,12 +589,7 @@
             "last_post_author_link": "={{ $json.last_post_author_link }}",
             "screenshot_filename": "={{ $json.id }}-{{ $json.post_link.split('/').slice(3).join('/').replace(/[^a-zA-Z0-9-_]/g, '-') }}.jpeg"
           },
-          "matchingColumns": [
-            "forum_icon",
-            "forum_name",
-            "forum_url_path",
-            "keyword_alert"
-          ],
+          "matchingColumns": [],
           "schema": [
             {
               "id": "forum_name",
@@ -623,8 +597,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "forum_url_path",
@@ -632,8 +605,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "forum_icon",
@@ -641,8 +613,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "post_id",
@@ -651,8 +622,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "post_title",
@@ -661,8 +631,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "post_link",
@@ -671,8 +640,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "post_author_name",
@@ -681,8 +649,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "post_author_link",
@@ -691,8 +658,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "last_post_date",
@@ -701,8 +667,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "last_post_author",
@@ -711,8 +676,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "last_post_author_link",
@@ -721,8 +685,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "screenshot_filename",
@@ -731,8 +694,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "keyword_alert",
@@ -740,8 +702,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -754,11 +715,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        1424,
-        1520
+        1920,
+        624
       ],
       "name": "Send Posts to Discord Feed",
-      "id": "04fe398e-5721-4dd1-b833-11157c2a0016",
+      "id": "9b4f4d34-b3ef-43cc-8eff-c60de6475015",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
     },
@@ -775,15 +736,36 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        -160,
-        1520
+        336,
+        624
       ],
-      "id": "365dfb58-fb97-4ec5-963e-64f88b1e9fd4",
+      "id": "96ffb691-02bc-4688-858c-d42b0d9edae9",
       "name": "AI Agent",
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
       "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://host.docker.internal:8831/sse",
+        "include": "except",
+        "excludeTools": [
+          "browser_file_upload",
+          "browser_install",
+          "browser_pdf_save",
+          "browser_drag",
+          "browser_generate_playwright_test"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        720,
+        896
+      ],
+      "id": "0992a016-aa4a-4909-b21c-8d6f6f3c3305",
+      "name": "Playwright MCP"
     }
   ],
   "pinData": {},
@@ -794,17 +776,6 @@
           {
             "node": "AI Agent",
             "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Playwright MCP": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -1022,8 +993,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "DarkForums.st Metadata": {
@@ -1067,8 +1037,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "AI Agent": {
@@ -1088,17 +1057,28 @@
           }
         ]
       ]
+    },
+    "Playwright MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b2dcbde4-229e-459b-a243-b883aecb4aa8",
+  "versionId": "5ee551cf-9ebe-4060-be6d-46e988add78c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "98e897a176d6aa8f9ebfef8f0306eab4fec5c697c6120f66479530a2b348cfea"
   },
-  "id": "7Z8tZLfPyfMX6dCt",
+  "id": "gKKmnWOclczwdwQp",
   "tags": []
 }
