@@ -108,9 +108,32 @@ The VNC interface runs a full Chrome browser where you can see exactly what the 
 
 <div align="center">
 
-<img src="images/vnc_browser_interaction.png" alt="VNC Browser Interface - AI Agent Forum Access" width="700">
+<img src="images/vnc_browser_interaction.png" alt="VNC Browser Interface - AI Agent Forum Access" width="500">
 
 </div>
+
+<div align="center">
+
+<img src="images/vnc_manual_captcha.png" alt="VNC Manual Captcha Solving" width="350" style="margin-right: 10px;">
+<img src="images/vnc_manual_login.png" alt="VNC Manual Login" width="350">
+
+</div>
+
+### **Quick Manual Access**
+
+When you need to manually control the browser for troubleshooting, authentication, or CAPTCHA solving:
+
+**VNC Web Interface:** Access http://localhost:6080
+- Press **Alt+F2** and enter: `chromium`
+- Or right-click desktop → Applications → run terminal and type: `chromium &`
+
+**Container Terminal:**
+```bash
+docker exec -it darkweb-forums-tracker-playwright bash
+chromium &
+```
+
+Perfect for solving CAPTCHAs, setting up authentication cookies, debugging failed scrapes, or manually navigating complex login flows that the AI agent couldn't handle automatically.
 
 ## 💡 V1 MVP Features
 

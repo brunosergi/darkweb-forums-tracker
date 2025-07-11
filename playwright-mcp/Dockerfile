@@ -81,7 +81,15 @@ exec node cli.js --browser chromium --host 0.0.0.0 --port ${PLAYWRIGHT_MCP_PORT:
     --output-dir /screenshots
 EOF
 
-RUN chmod +x /app/start-with-vnc.sh
+# Create chromium shortcut script
+RUN cat > /usr/local/bin/chromium << 'EOF'
+#!/bin/bash
+export DISPLAY=:99
+exec /ms-playwright/chromium-*/chrome-linux/chrome --no-sandbox --disable-dev-shm-usage "$@"
+EOF
+
+RUN chmod +x /app/start-with-vnc.sh && \
+    chmod +x /usr/local/bin/chromium
 
 USER 1000
 WORKDIR /app
