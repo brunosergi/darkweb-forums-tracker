@@ -23,6 +23,7 @@ volumes:
   playwright-browser-data:
   redis-data:
   n8n-workflows:
+  shared-browser-data:
 
 services:
   # -----------------------------------------------------------------
@@ -209,6 +210,7 @@ services:
     volumes:
       - shared-screenshots:/screenshots
       - playwright-browser-data:/app/browser-data
+      - shared-browser-data:/shared-browser-data
     networks: [app-network]
     depends_on: []
     healthcheck:

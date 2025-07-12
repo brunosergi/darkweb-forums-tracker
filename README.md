@@ -146,6 +146,7 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 ✅ **Keyword branch separation** - Add keywords to "Keywords" node in array format (user customizable)  
 ✅ **Alert workflows** - IF has any keyword → alert branch (screenshot + AI summary), IF no keywords → normal branch  
 ✅ **Human-in-the-Loop VNC** - Web-based browser GUI for manual CAPTCHA solving and login assistance  
+✅ **Shared browser sessions** - VNC and Playwright MCP use same Chromium executable with shared user data directory for persistent login sessions  
 ✅ **Database storage** - Save to Supabase  
 ✅ **Discord results** - Send to Discord with distinction between normal/alert posts  
 ✅ **Completion notification** - Send Discord scan finished info with timestamp
@@ -168,10 +169,6 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 - **Commercial/residential proxies** support for anti-bot problems (IP rotation, captcha solver)
 - **AI Agent auto-login** - Provide forum credentials in .env for AI Agent usage
 
-### 🔐 **Session Management**
-- **Playwright MCP session file** to keep cookies and login (User Profile `--user-data-dir`)
-- **Save login session** first time manually to reuse
-- **Session monitoring** - If session closes, AI sends Discord alert for manual re-entry
 
 ### ⚡ **Technical Enhancements**
 - **AI agent N8N model selector** - Define which LLM to use and AI Agent fallback
