@@ -6,7 +6,7 @@ Tired of manually checking darkweb forums for threat intelligence? I created thi
 
 <div align="center">
 
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://docker.com) [![AI](https://img.shields.io/badge/AI-Google_Gemini-FF6B35)](https://ai.google.dev) [![n8n](https://img.shields.io/badge/Automation-n8n-FF6D5A)](https://n8n.io) [![Playwright MCP](https://img.shields.io/badge/Browser-Playwright_MCP-2D8C34?logo=playwright)](https://github.com/microsoft/playwright-mcp) [![Discord](https://img.shields.io/badge/Discord-Integration-5865F2?logo=discord)](https://discord.com) [![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E)](https://supabase.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://docker.com) [![AI](https://img.shields.io/badge/Google_Gemini-AI-FF6B35?logo=googlegemini)](https://ai.google.dev) [![n8n](https://img.shields.io/badge/n8n-Automation-FF6D5A?logo=n8n)](https://n8n.io) [![Playwright MCP](https://custom-icon-badges.demolab.com/badge/Playwright_MCP-Browser_Automation-2EAD33?logo=playwright&logoColor=fff)](https://github.com/microsoft/playwright-mcp) [![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase)](https://supabase.com) [![Discord](https://img.shields.io/badge/Discord-Integration-5865F2?logo=discord)](https://discord.com)
 
 <img src="images/forum_posts_discord.png" alt="DarkWeb Forums Discord Feed" width="350">
 
@@ -83,12 +83,13 @@ docker compose up -d
 
 1. **🕵🏿 DarkForums.st** - Track database leaks and breach discussions
 2. **🕐 Scheduled Monitoring** - System checks configured forums every 4 hours
-3. **🤖 AI Agent Scraping** - Playwright MCP with browser automation extracts forum posts
+3. **🤖 AI Agent Scraping** - Playwright MCP with browser automation extracts forum posts and timestamps
 4. **🔍 Smart Deduplication** - Only processes new posts (no duplicates from database)
-5. **🎯 Keyword Detection** - Scans post titles for configurable alert keywords
-6. **📸 Screenshot & Analysis** - For alerts: captures screenshots and generates AI summaries
-7. **📱 Discord Delivery** - Sends normal posts (blue) and alerts (red) to team channel
-8. **💾 Database Storage** - Saves everything for historical analysis and tracking
+5. **🎯 Entity Detection** - Advanced keyword matching with canonical names, variations, and text normalization
+6. **🔄 Retry Logic** - 2-attempt retry system with intelligent backoff for failed operations
+7. **📸 Screenshot & Analysis** - For alerts: captures screenshots and generates AI summaries
+8. **📱 Discord Delivery** - Comprehensive logging with color-coded alerts and detailed status updates
+9. **💾 Database Storage** - Enhanced schema with timestampz format and entity tracking
 
 ## 🖥️ Human-in-the-Loop VNC Interface
 
@@ -147,21 +148,19 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 ✅ **Alert workflows** - IF has any keyword → alert branch (screenshot + AI summary), IF no keywords → normal branch  
 ✅ **Human-in-the-Loop VNC** - Web-based browser GUI for manual CAPTCHA solving and login assistance  
 ✅ **Shared browser sessions** - VNC and Playwright MCP use same Chromium executable with shared user data directory for persistent login sessions  
-✅ **Database storage** - Save to Supabase  
-✅ **Discord results** - Send to Discord with distinction between normal/alert posts  
-✅ **Completion notification** - Send Discord scan finished info with timestamp
+✅ **AI Agent retry logic** - 2-attempt retry system with intelligent backoff and Discord notifications  
+✅ **Enhanced entity detection** - Smart keyword matching with canonical names, variations, and text normalization  
+✅ **Timestamp format standardization** - All dates stored in timestampz format for proper temporal analysis  
+✅ **Advanced Discord logging** - Comprehensive status tracking with color-coded alerts and detailed error reporting  
+✅ **Database storage** - Saves everything for historical analysis and tracking
+✅ **Discord results** - Send to Discord with distinction between normal/alert posts using entity-based detection  
 
 ## 🗺️ What I'm Planning Next
 
 ### 🏢 **Forum & Data Improvements**
 - **Multiple forums support** - Track breach forums, lockbit, xss.is, etc.
-- **Turn last_post_date** to timestamp ISO format
 - **Scroll down** a little bit before taking screenshot for better view
 - **Modularize workflows** into multiple workflows to separate concerns
-
-### 🎯 **Enhanced Keyword Detection**
-- **Better regex in keywords** to avoid mismatching (e.g. avoid "usa" keyword matching "usage" in forum titles)
-- **More precise pattern matching** with context awareness
 
 ### 🤖 **Authentication & Anti-Bot**
 - **Solve captcha and login sub-workflow tools** - Call AI Agents to handle automatically
@@ -172,8 +171,8 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 
 ### ⚡ **Technical Enhancements**
 - **AI agent N8N model selector** - Define which LLM to use and AI Agent fallback
+- **2nd AI Agent retry logic** - Apply same 2-attempt retry system to alert post analysis workflow
 - **pg_vector** - Vectorize Supabase data and turn forum posts into RAG for AI chat
-- **Better rerun when tracking failed** - If gets data → repeat in 1 hour, if fails → repeat in 10 minutes
 - **Better schedule trigger** - Configure minutes/hours for each forum URL path
 - **Tor proxy** to reach .onion forums
 - **More notification apps** - Slack, Telegram, etc.

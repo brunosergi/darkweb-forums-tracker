@@ -76,7 +76,7 @@ echo "🌐 Web VNC available at: http://localhost:6080"
 echo "🎭 Starting Playwright MCP..."
 exec node cli.js --browser chromium --host 0.0.0.0 --port ${PLAYWRIGHT_MCP_PORT:-8831} \
     --viewport-size "${PLAYWRIGHT_VIEWPORT_SIZE:-1280,720}" \
-    --image-responses omit --ignore-https-errors \
+    --image-responses allow --ignore-https-errors \
     --executable-path /ms-playwright/chromium-*/chrome-linux/chrome \
     --user-data-dir /shared-browser-data \
     --output-dir /screenshots \

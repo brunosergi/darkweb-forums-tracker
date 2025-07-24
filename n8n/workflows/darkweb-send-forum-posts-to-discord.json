@@ -12,7 +12,7 @@
         "embeds": {
           "values": [
             {
-              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Last Post was` **{{ $json.last_post_date }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**",
+              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Posted at` **{{ $json.post_date.toDateTime().format('dd MMM yyyy HH:mm') }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**\n`🕜 Last Post was at` **{{ $json.last_post_date.toDateTime().format('dd MMM yyyy HH:mm') }}**",
               "author": "={{ $('Forums Post to Discord').item.json.forum_name }}",
               "timestamp": "=",
               "title": "={{ $json.post_title }}",
@@ -24,16 +24,16 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        16,
-        128
+        176,
+        240
       ],
-      "id": "ed76d729-52e0-46de-ab58-a2090f40facd",
+      "id": "8ecf22a7-0d36-48e2-a491-229d9e131dda",
       "name": "Send Normal Posts",
       "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
       "credentials": {
         "discordWebhookApi": {
-          "id": "xqXcOV565MNG0nSM",
-          "name": "Discord Webhook account"
+          "id": "RjbFciIefptLTUfH",
+          "name": "Discord Darkforums Chat"
         }
       },
       "onError": "continueErrorOutput"
@@ -49,7 +49,7 @@
         "embeds": {
           "values": [
             {
-              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Last Post was` **{{ $json.last_post_date }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**\n> {{ $json.post_summary }}",
+              "description": "=`👤 Posted by` **[{{ $json.post_author_name }}]({{ $json.post_author_link }})**\n`🕜 Posted at` **{{ $json.post_date.toDateTime().format('dd MMM yyyy HH:mm') }}**\n`🗣️ Last Post Author` **[{{ $json.last_post_author }}]({{ $json.last_post_author_link }})**\n`🕜 Last Post was at` **{{ $json.last_post_date.toDateTime().format('dd MMM yyyy HH:mm') }}**\n> {{ $json.post_summary }}\n`{{ $json.entity_name }}`",
               "author": "={{ $('Forums Post to Discord').item.json.forum_name }}🚨",
               "color": "#FF0000",
               "timestamp": "=",
@@ -63,16 +63,16 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        16,
-        368
+        176,
+        480
       ],
-      "id": "366ce8d6-0a47-4961-a355-8ac4d7d2df00",
+      "id": "1a7ae2e1-2b36-4f83-a9cc-fef7b35110a7",
       "name": "Send Alert Posts",
       "webhookId": "32783bbd-8818-4f94-8521-f0fb0b949c82",
       "credentials": {
         "discordWebhookApi": {
-          "id": "xqXcOV565MNG0nSM",
-          "name": "Discord Webhook account"
+          "id": "RjbFciIefptLTUfH",
+          "name": "Discord Darkforums Chat"
         }
       },
       "onError": "continueErrorOutput"
@@ -82,10 +82,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        400,
-        128
+        560,
+        240
       ],
-      "id": "a8fa5068-98ea-4bf7-959a-0399b628d197",
+      "id": "16288935-4356-48fa-a5a7-43e6fe9dee68",
       "name": "Merge Posts"
     },
     {
@@ -103,7 +103,7 @@
                 "conditions": [
                   {
                     "id": "f4b5e00a-da90-470c-ba0f-c0187e5d1107",
-                    "leftValue": "={{ $json.keyword_alert }}",
+                    "leftValue": "={{ $json.post_alert }}",
                     "rightValue": "",
                     "operator": {
                       "type": "boolean",
@@ -127,7 +127,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.keyword_alert }}",
+                    "leftValue": "={{ $json.post_alert }}",
                     "rightValue": "",
                     "operator": {
                       "type": "boolean",
@@ -150,10 +150,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -304,
-        368
+        -144,
+        480
       ],
-      "id": "df3a2748-7051-4377-ae2e-4e0224b961bb",
+      "id": "b96320a4-5f6b-4aa1-b5c6-b96f5d9e11ca",
       "name": "Switch Post Type"
     },
     {
@@ -185,15 +185,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        752,
-        128
+        912,
+        240
       ],
-      "id": "9909969c-8327-40d5-9f69-652a0f0ad2ee",
+      "id": "378ebdb0-7497-4022-bb9f-3456a3db98f1",
       "name": "Update Sent Status",
       "alwaysOutputData": false,
       "credentials": {
         "supabaseApi": {
-          "id": "lDEgB2aVZXWmx1nk",
+          "id": "okGUlQOFiLX3NatJ",
           "name": "Supabase account"
         }
       },
@@ -206,10 +206,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -304,
-        624
+        -144,
+        736
       ],
-      "id": "c83d538c-49c4-48c2-a1eb-f359c18524fc",
+      "id": "9203ef18-c519-4e9b-9404-cbb7eb7c274f",
       "name": "Loop Over Alert Post URLs"
     },
     {
@@ -219,10 +219,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        16,
-        624
+        176,
+        736
       ],
-      "id": "6ddb89a9-d7bf-4db8-a218-622999d4e0d0",
+      "id": "d43c6cc4-3881-4eee-b38f-dd77d2b07fbe",
       "name": "Rate Limit",
       "webhookId": "3ecf9259-8e83-44dd-b394-8e91c6f007c1"
     },
@@ -247,7 +247,7 @@
             },
             {
               "fieldId": "post_screenshot_url",
-              "fieldValue": "=https://bfznynuipmrwmjogncek.supabase.co/storage/v1/object/screenshots/forum_posts/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}"
+              "fieldValue": "={{ $env.SUPABASE_URL }}/storage/v1/object/screenshots/forum_posts/{{ $('Loop Over Alert Post URLs').item.json.screenshot_filename }}"
             },
             {
               "fieldId": "post_visibility",
@@ -259,15 +259,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1360,
-        624
+        1520,
+        736
       ],
-      "id": "3874567c-81ec-46d8-856e-98cd89f6b8c9",
+      "id": "37a9f621-8d63-4842-b4ba-dfdac8d57f45",
       "name": "Update Alert Post",
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "lDEgB2aVZXWmx1nk",
+          "id": "okGUlQOFiLX3NatJ",
           "name": "Supabase account"
         }
       },
@@ -335,10 +335,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        400,
-        624
+        560,
+        736
       ],
-      "id": "14a26cdc-0ce4-47ed-a9a5-af7ab487c059",
+      "id": "19574fbd-c822-4f12-b928-05f7a4dc4778",
       "name": "Switch Alert Agent Output",
       "onError": "continueErrorOutput"
     },
@@ -367,15 +367,15 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        752,
-        896
+        912,
+        1008
       ],
-      "id": "d5dcdbd5-5274-4096-91fe-59303e99fd1a",
+      "id": "d673a811-37ae-48a4-a230-7558c0f10087",
       "name": "Update as Alert Post Error",
       "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
-          "id": "lDEgB2aVZXWmx1nk",
+          "id": "okGUlQOFiLX3NatJ",
           "name": "Supabase account"
         }
       },
@@ -408,17 +408,17 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1056,
-        624
+        1216,
+        736
       ],
-      "id": "827704b2-87a3-4888-8898-9806250bfd21",
+      "id": "ddff53fc-6b6c-49ff-a4b7-86762c03c20f",
       "name": "Add Screenshot File to Supabase Bucket",
       "retryOnFail": false,
       "maxTries": 2,
       "waitBetweenTries": 5000,
       "credentials": {
         "supabaseApi": {
-          "id": "lDEgB2aVZXWmx1nk",
+          "id": "okGUlQOFiLX3NatJ",
           "name": "Supabase account"
         }
       },
@@ -434,10 +434,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        752,
-        624
+        912,
+        736
       ],
-      "id": "b2f0894b-9cd2-4175-b514-f8c375a688f9",
+      "id": "3080e19d-c7c9-4d2a-992d-1b6b86bd5502",
       "name": "Get Screenshot Local File",
       "executeOnce": false,
       "alwaysOutputData": true,
@@ -502,6 +502,12 @@
               "type": "string"
             },
             {
+              "id": "aa52db1b-f39f-493d-a086-472fed51c564",
+              "name": "post_date",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.post_date } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_date } catch(e) { return null } } })() }}",
+              "type": "string"
+            },
+            {
               "id": "8ae8a1ca-3dc9-4d61-9eb1-5c2a6c9d5864",
               "name": "last_post_date",
               "value": "={{ (() => { try { return $('Update Alert Post').first().json.last_post_date } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_date } catch(e) { return null } } })() }}",
@@ -518,6 +524,12 @@
               "name": "last_post_author_link",
               "value": "={{ (() => { try { return $('Update Alert Post').first().json.last_post_author_link } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_author_link } catch(e) { return null } } })() }}",
               "type": "string"
+            },
+            {
+              "id": "2c69aa4b-9af0-4cba-aa98-e14e351cd70f",
+              "name": "entity_name",
+              "value": "={{ (() => { try { return $('Update Alert Post').first().json.entity_name } catch(e) { try { return $('Update as Alert Post Error').first().json.last_post_author_link } catch(e) { return null } } })() }}",
+              "type": "string"
             }
           ]
         },
@@ -526,10 +538,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1360,
-        1168
+        1520,
+        1280
       ],
-      "id": "1f4c6b68-e5ef-4fc3-8996-aa090e9f3b32",
+      "id": "e2524e89-b5f9-464f-908b-ea51e5bb0e7f",
       "name": "Alert Post Structure"
     },
     {
@@ -539,10 +551,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1360,
-        896
+        1520,
+        1008
       ],
-      "id": "0e0dcb70-4b21-4e13-b9e2-d3a6c036f3a9",
+      "id": "99aa4c28-e387-4831-9181-83fc2fd5120f",
       "name": "Delete Screenshot Local File"
     },
     {
@@ -554,28 +566,28 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        0,
-        1120
+        160,
+        1232
       ],
-      "id": "5ada7822-07eb-41aa-a21a-771f4d84ecd3",
+      "id": "c99daab3-45d7-4f35-9bcb-2209310f5201",
       "name": "Structured Output Parser"
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.0-flash",
+        "modelName": "models/gemini-2.5-flash-lite-preview-06-17",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -128,
-        1184
+        32,
+        1296
       ],
-      "id": "85ad7c5d-bf01-4e5d-9476-3c80eb61d292",
+      "id": "ddbcb947-4d0a-458d-bb92-f596c6ae8853",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
-          "id": "AWUhNNtLS5BaQvTz",
+          "id": "s0TtVLCRa3k8hm0V",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -587,10 +599,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolThink",
       "typeVersion": 1,
       "position": [
-        288,
-        1184
+        448,
+        1296
       ],
-      "id": "cb2a56f7-625b-4b4f-85b6-3ec4162567d6",
+      "id": "da57f7e5-10a9-4099-a702-19d559285cba",
       "name": "Think"
     },
     {
@@ -608,10 +620,10 @@
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
       "typeVersion": 1,
       "position": [
-        432,
-        1184
+        592,
+        1296
       ],
-      "id": "bb2e3f76-5592-4989-977a-c6ea390362d6",
+      "id": "5ffedb2c-b811-46ae-a718-c4352fcaf580",
       "name": "Playwright MCP"
     },
     {
@@ -646,7 +658,12 @@
               "name": "post_author_link"
             },
             {
-              "name": "last_post_date"
+              "name": "post_date",
+              "type": "any"
+            },
+            {
+              "name": "last_post_date",
+              "type": "any"
             },
             {
               "name": "last_post_author"
@@ -658,19 +675,23 @@
               "name": "screenshot_filename"
             },
             {
-              "name": "keyword_alert",
+              "name": "post_alert",
+              "type": "any"
+            },
+            {
+              "name": "entity_name",
               "type": "any"
             }
           ]
         }
       },
-      "id": "d2751f31-db84-4567-a86e-bc89b6ab7dc2",
+      "id": "5817b091-4748-4bac-8b24-cf74037dad6b",
       "typeVersion": 1.1,
       "name": "Forums Post to Discord",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        -304,
-        128
+        -144,
+        240
       ]
     },
     {
@@ -694,17 +715,17 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        400,
-        368
+        560,
+        480
       ],
-      "id": "84c1a506-4b77-448b-9608-b0f6a5d167bd",
+      "id": "00fc90f8-a51e-4b12-b286-f4ef8d6caebf",
       "name": "Inform Tracking Completed",
       "webhookId": "7b0843fe-ee9e-45de-8198-74a6adc41eb2",
       "executeOnce": true,
       "credentials": {
         "discordWebhookApi": {
-          "id": "xqXcOV565MNG0nSM",
-          "name": "Discord Webhook account"
+          "id": "RjbFciIefptLTUfH",
+          "name": "Discord Darkforums Chat"
         }
       },
       "onError": "continueErrorOutput"
@@ -722,10 +743,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        16,
-        896
+        176,
+        1008
       ],
-      "id": "071138ab-dfae-4e40-b1a2-b87d8e6b0479",
+      "id": "b506ac93-767e-485a-a151-258da29d14d7",
       "name": "AI Agent",
       "retryOnFail": true,
       "maxTries": 2,
@@ -826,6 +847,17 @@
         ]
       ]
     },
+    "Update Alert Post": {
+      "main": [
+        [
+          {
+            "node": "Delete Screenshot Local File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Switch Alert Agent Output": {
       "main": [
         [
@@ -845,17 +877,6 @@
         [
           {
             "node": "Update as Alert Post Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update Alert Post": {
-      "main": [
-        [
-          {
-            "node": "Delete Screenshot Local File",
             "type": "main",
             "index": 0
           }
@@ -980,22 +1001,22 @@
         ]
       ]
     },
-    "Forums Post to Discord": {
+    "AI Agent": {
       "main": [
         [
           {
-            "node": "Switch Post Type",
+            "node": "Switch Alert Agent Output",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "AI Agent": {
+    "Forums Post to Discord": {
       "main": [
         [
           {
-            "node": "Switch Alert Agent Output",
+            "node": "Switch Post Type",
             "type": "main",
             "index": 0
           }
@@ -1007,11 +1028,10 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "39dc0572-e5e6-4161-a923-4d679eadf682",
+  "versionId": "c162384e-eba8-4b29-8917-e100d454d346",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "98e897a176d6aa8f9ebfef8f0306eab4fec5c697c6120f66479530a2b348cfea"
   },
-  "id": "jcpIiCxbvrHkOY2L",
+  "id": "sT0FP436BFPS5V7o",
   "tags": []
 }

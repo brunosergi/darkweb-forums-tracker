@@ -13,15 +13,16 @@ create table public.darkweb_forums (
   post_screenshot_url text null,
   post_author_name text null,
   post_author_link text null,
-  last_post_date text null,
+  last_post_date timestamp with time zone null,
   last_post_author text null,
   last_post_author_link text null,
-  keyword_alert boolean not null default false,
+  post_alert boolean not null default false,
   sent boolean not null default false,
   sent_at timestamp with time zone null,
+  entity_name text[] null,
+  post_date timestamp with time zone null,
   constraint darkweb_forums_pkey primary key (id),
-  constraint darkweb_forums_post_link_key unique (post_link),
-  constraint darkweb_forums_id_key unique (id)
+  constraint darkweb_forums_post_link_key unique (post_link)
 ) TABLESPACE pg_default;
 
 -- Enable Row Level Security (RLS) for the table

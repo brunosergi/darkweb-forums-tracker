@@ -61,8 +61,8 @@ docker compose up -d
 This automatically:
 - Sets up PostgreSQL database for N8N
 - Configures Redis for N8N queue management
-- Launches Playwright MCP with VNC support
-- Imports N8N workflows
+- Launches Playwright MCP with VNC support and shared browser sessions
+- Imports N8N workflows with enhanced AI agent and retry logic
 - Starts all services with health checks
 
 ### 5. Verify Services Running
@@ -125,11 +125,11 @@ All services should show "healthy" status.
 - "Supabase RPC Check Existing URLs" → "Supabase RPC" HTTP Request node
 - "Add Posts to Supabase" → Supabase node
 - All Discord nodes
-- "Keywords" → Set node to your custom alert keywords
+- "Keywords" → Configure entity dictionary with canonical names and variations
 
 <div>
 
-<img src="images/workflow_get_forum_posts.jpeg" alt="Workflow Get Forum Posts" width="500">
+<img src="images/workflow_get_forum_posts.png" alt="Workflow Get Forum Posts" width="500">
 
 </div>
 
@@ -143,7 +143,7 @@ All services should show "healthy" status.
 
 <div>
 
-<img src="images/workflow_send_forum_posts_to_discord.jpeg" alt="Workflow Send Forum Posts to Discord" width="500">
+<img src="images/workflow_send_forum_posts_to_discord.png" alt="Workflow Send Forum Posts to Discord" width="500">
 
 </div>
 
@@ -151,8 +151,8 @@ All services should show "healthy" status.
 
 1. Go to **Workflows** in N8N
 2. Click **Activate** toggle for both workflows:
-   - `darkweb-get-forum-posts` (main monitoring workflow)
-   - `darkweb-send-forum-posts-to-discord` (Discord notification + Alert Posts AI Agent workflow)
+   - `darkweb-get-forum-posts` (main monitoring workflow with retry logic and entity detection)
+   - `darkweb-send-forum-posts-to-discord` (Discord notification + Alert Posts AI Agent workflow with enhanced logging)
 
 ---
 
@@ -228,9 +228,10 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 
 ### Expected Discord Flow
 
-1. **"Forum tracking started"** - Scan begins
-2. **Forum posts** - Normal posts (gray) and alerts (red with screenshots)
-3. **"Forum tracking completed"** - Scan finished with timestamp
+1. **"Forum tracking started"** - Scan begins with tracking notification
+2. **Forum posts** - Normal posts (blue) and entity alerts (red with screenshots and AI summaries)
+3. **Retry notifications** - Yellow alerts if initial attempts fail
+4. **"Forum tracking completed"** - Scan finished with timestamp and processing statistics
 
 ---
 
@@ -243,14 +244,22 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 2. Add new forum URLs to the forum list
 3. Modify AI agent prompts for forum-specific parsing
 
-### Configure Alert Keywords
+### Configure Entity Detection Keywords
 
 **In `darkweb-get-forum-posts` workflow:**
 1. Find the "Keywords" node
-2. Update the array with your keywords:
+2. Update the entity dictionary with canonical names and variations:
 ```javascript
-["twitter", "telegram", "brazil", "crypto", "lockbit", "your-keyword"]
+[
+  ["lockbit"],
+  ["facebook", "meta"],
+  ["bank of america", "bak"],
+  ["united states", "united states of america", " usa ", "american"],
+  ["brasil", "brazil", ".br", ".com.br", "brazilian"],
+  ["twitter", "x.com", "tweet"]
+]
 ```
+**Note**: Each array represents one entity - first element is the canonical name, others are variations/aliases.
 
 ### Change AI Models
 
@@ -282,9 +291,10 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 - Test credentials in N8N credential settings
 
 **Workflow execution failures:**
-- Check Google Gemini API quota/rate limits
+- Check Google Gemini API quota/rate limits (retry logic will attempt 2 times)
 - Verify Playwright MCP is accessible at port 8831
 - Ensure Discord webhook URLs are valid
+- Monitor retry attempts in N8N execution logs
 
 **VNC connection issues:**
 - Confirm port 6080 is accessible
@@ -305,10 +315,11 @@ Perfect for solving CAPTCHAs, setting up authentication cookies, debugging faile
 
 **Missing table errors:**
 ```bash
-# Verify table exists in Supabase SQL Editor
-SELECT * FROM public.darkweb_forums LIMIT 1;
+# Verify table exists with new schema in Supabase SQL Editor
+SELECT id, post_title, post_date, last_post_date, post_alert, entity_name 
+FROM public.darkweb_forums LIMIT 1;
 
-# If missing, re-run the supabase/supabase.sql script
+# If missing or schema outdated, re-run the supabase/supabase.sql script
 ```
 
 **RLS (Row Level Security) warnings:**
